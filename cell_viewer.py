@@ -15,6 +15,9 @@ from tkinter_modules import tk, DateEntry
 import os
 from os.path import join as join_path
 import datetime
+
+from matplotlib import cm
+from matplotlib.colors import Normalize, to_hex
 import matplotlib.pyplot as plt
 
 DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/png/"
@@ -77,17 +80,6 @@ class CookData:
         return ary
 
 
-cook_debug = False
-if __name__ == "__main__" and cook_debug:
-    from_d = datetime.date(year=2020, month=11, day=27)
-    to_d = datetime.date(year=2020, month=12, day=9)
-
-    cook_data = CookData(data_dir=DATA_DIR, from_date=from_d, to_date=to_d, plane_name="T1", plane_rows=10,
-                         plane_cols=12)
-    print(cook_data.mean.shape)
-    print(cook_data.std.shape)
-
-
 class CellsApp:
     def __init__(self, window_title=None, data_dir: str = DATA_DIR):
         self.window = tk.Tk()
@@ -101,6 +93,8 @@ class CellsApp:
         # D A T A - N E E D E D
         self.plane_name = "T1"
         self.all_data = None
+        # self.data_range = None
+        self.mapper = None
         self.mean = None
         self.std = None
 
@@ -109,6 +103,7 @@ class CellsApp:
         self.to_date = None
         self.ok_var = tk.IntVar()
         self.frm_cells = None
+        self.choice_var = None
 
         self.choose_dates()
 
@@ -120,7 +115,6 @@ class CellsApp:
         frm_dates.pack(fill=tk.X, expand=True)
 
         lbl_dates = tk.Label(master=frm_dates, text='Choose dates:')
-        lbl_dates.grid(row=0, column=0, columnspan=2)
 
         lbl_from = tk.Label(master=frm_dates, text='From: ')
         cal_from = DateEntry(master=frm_dates, width=12, background='darkblue',
@@ -132,20 +126,23 @@ class CellsApp:
         btn_draw = tk.Button(master=frm_dates, text="Ok",
                              command=lambda a=cal_from, b=cal_to: self.refresh_cells(a, b))
 
+        lbl_plane = tk.Label(master=frm_dates, text="Plane: ")
         option_list = ["T1", "T3", "T4"]
-        choice_var = tk.StringVar(master=frm_dates)
-        choice_var.set(option_list[0])
-        opt_plane_name = tk.OptionMenu(frm_dates, choice_var, *option_list)
+        self.choice_var = tk.StringVar(master=frm_dates)
+        self.choice_var.set(option_list[0])
+        opt_plane_name = tk.OptionMenu(frm_dates, self.choice_var, *option_list)
 
+        lbl_dates.grid(row=0, column=0, columnspan=2)
         lbl_from.grid(row=1, column=0)
         cal_from.grid(row=1, column=1)
         lbl_to.grid(row=2, column=0)
         cal_to.grid(row=2, column=1)
+        
+        lbl_plane.grid(row=0, column=2)
         opt_plane_name.grid(row=1, column=2, rowspan=2)
         btn_draw.grid(row=1, column=3, rowspan=2)
 
         frm_dates.wait_variable(self.ok_var)
-        self.plane_name = choice_var.get()
 
     def draw_cells(self):
         self.frm_cells = tk.Frame(master=self.window)
@@ -161,14 +158,26 @@ class CellsApp:
                     # relief=tk.RAISED,
                     borderwidth=0
                 )
-                frm_cell.grid(row=i, column=j)
+                frm_cell.grid(row=i, column=j, sticky="news")
 
                 mean, std = self.get_mean(i, j), self.get_std(i, j)
+                bg_color, fg_color = self.set_button_colors(mean)
                 btn_plot = tk.Button(master=frm_cell,
                                      text=f"{mean:.1f}\n\xB1{std:.1f}",
                                      height=2, width=3,
+                                     bg=bg_color, fg=fg_color,
                                      command=lambda a=i, b=j: self.cell_button(a, b))
                 btn_plot.pack(fill=tk.BOTH)
+
+    def set_button_colors(self, mean):
+        # colormap possible values = viridis, jet, spectral
+        rgba_color = self.mapper.to_rgba(mean)
+        bg_color = to_hex(rgba_color[:-1])
+        if np.min(self.mean) <= mean < np.mean(self.mean):
+            fg_color = "#FFFFFF"
+        else:
+            fg_color = "#000000"
+        return bg_color, fg_color
 
     def refresh_cells(self, cal_from, cal_to):
         self.ok_var.set(1)
@@ -176,13 +185,20 @@ class CellsApp:
         self.from_date = cal_from.get_date()
         self.to_date = cal_to.get_date()
 
+        self.plane_name = self.choice_var.get()
+
         cooked_data = CookData(data_dir=self.main_data_dir,
                                from_date=self.from_date, to_date=self.to_date,
                                plane_name=self.plane_name,
                                plane_rows=self.plane_rows, plane_cols=self.plane_cols)
         self.all_data = cooked_data.all_data
+
         self.mean = cooked_data.mean
         self.std = cooked_data.std
+
+        # normalize item number values to colormap
+        norm = Normalize(vmin=np.min(self.mean), vmax=np.max(self.mean))
+        self.mapper = cm.ScalarMappable(norm=norm, cmap="inferno")
 
         try:
             self.frm_cells.destroy()
@@ -191,18 +207,18 @@ class CellsApp:
         self.draw_cells()
 
     def cell_button(self, row_id, col_id):
-        
+
         all_hits = self.all_data[:, row_id, col_id]
         mean = self.mean[row_id, col_id]
         std = self.std[row_id, col_id]
 
         plt.figure(f"cell ({row_id}, {col_id})")
-        plt.title(f"Cell ({row_id}, {col_id})")
+        plt.title(f"Plane {self.plane_name} - Cell index ({row_id}, {col_id})")
 
         plt.hist(all_hits, color='c', edgecolor='k', alpha=0.65)
         plt.axvline(mean, color='k', linestyle='dashed', linewidth=1, label=f'Mean: {mean:.2f}')
         min_ylim, max_ylim = plt.ylim()
-        plt.errorbar(x=mean, y=max_ylim * 0.5, xerr=std * 0.5, color='k', label=f'Std.: {std:.2f}')
+        plt.errorbar(x=mean, y=max_ylim * 0.68, xerr=std, color='k', label=f'Std.: {std:.2f}')
 
         plt.xlabel("Number of hits")
         plt.ylabel("Counts")
@@ -232,6 +248,5 @@ class CellsApp:
         self.window.mainloop()
 
 
-full_debug = True
-if __name__ == "__main__" and full_debug:
+if __name__ == "__main__":
     CellsApp()
