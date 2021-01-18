@@ -20,8 +20,7 @@ import datetime
 from matplotlib import cm
 from matplotlib.colors import Normalize, to_hex
 import matplotlib.pyplot as plt
-
-DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/png/"
+from const import DATA_DIR
 
 
 # TODO:
@@ -204,9 +203,7 @@ class CellsApp:
                 numpy_value = self.get_math_value(val=self.choice_math_val.get())[i, j]
                 bg_color, fg_color = self.set_button_colors(numpy_value)
                 btn_plot = tk.Button(master=frm_cell,
-                                     text=f"{self.get_math_value(val='mean')[i, j]:.0f}"
-                                          f"\n\xB1"
-                                          f"{self.get_math_value(val='deviation')[i, j]:.0f}",
+                                     text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
                                      height=2, width=3,
                                      bg=bg_color, fg=fg_color,
                                      command=lambda a=i, b=j: self.cell_button(a, b))
@@ -283,6 +280,7 @@ class CellsApp:
         plt.axvline(mean, color='k', linestyle='dashed', linewidth=1, label=f'Mean: {mean:.2f}')
         min_ylim, max_ylim = plt.ylim()
         plt.errorbar(x=mean, y=max_ylim * 0.68, xerr=std, color='k', label=f'Std.: {std:.2f}')
+        plt.yscale("log")
 
         plt.xlabel("Number of hits")
         plt.ylabel("Counts")
