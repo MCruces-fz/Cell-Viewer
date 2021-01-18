@@ -1,0 +1,10 @@
+datentry_keys = ['mindate', 'calendar_cursor', 'justify', 'validatecommand', 'tooltipalpha', 'weekendforeground',
+                 'headersbackground', 'tooltipforeground', 'selectforeground', 'xscrollcommand',
+                 'disabledselectforeground', 'normalforeground', 'date_pattern', 'disableddayforeground', 'validate',
+                 'disabledselectbackground', 'width', 'font', 'disabledforeground', 'cursor', 'show', 'locale',
+                 'disabledbackground', 'othermonthweforeground', 'tooltipbackground', 'headersforeground', 'state',
+                 'borderwidth', 'weekendbackground', 'disableddaybackground', 'bordercolor', 'firstweekday',
+                 'selectmode', 'takefocus', 'weekenddays', 'foreground', 'exportselection', 'selectbackground',
+                 'othermonthbackground', 'showothermonthdays', 'invalidcommand', 'othermonthforeground', 'maxdate',
+                 'style', 'normalbackground', 'othermonthwebackground', 'textvariable', 'showweeknumbers',
+                 'tooltipdelay', 'background']

@@ -11,6 +11,7 @@ Command Buttons
 https://stackoverflow.com/questions/10865116/tkinter-creating-buttons-in-for-loop-passing-command-arguments
 """
 import numpy as np
+from scipy.stats import kurtosis, skew
 from tkinter_modules import tk, DateEntry
 import os
 from os.path import join as join_path
@@ -22,6 +23,15 @@ import matplotlib.pyplot as plt
 
 DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/png/"
 
+
+# TODO:
+#    - Quitar decimales de los númros en las celdas
+#    - Formato de fecha dd/mm/yy
+#    - Color en función de STD. y quitarla de los
+#    botones para mayor visibilidad
+#    - Cambiar color map a arcoiris
+#    - En un futuro hacer más botones para escoger
+#    distintas cofiguracioes de colores y datos mostrados
 
 class CookData:
     def __init__(self, data_dir: str = DATA_DIR, from_date=None, to_date=None,
@@ -40,6 +50,8 @@ class CookData:
         self.all_data = self.read_data()
         self.mean = self.all_data.mean(axis=0)
         self.std = self.all_data.std(axis=0)
+        self.kurtosis = kurtosis(self.all_data, axis=0)
+        self.symmetry = skew(self.all_data, axis=0)  # skew = 0 -> 100% symmetric
 
     def set_full_rate_paths(self):
         dir_1 = self.from_date.strftime("%y%j")
@@ -95,15 +107,20 @@ class CellsApp:
         self.all_data = None
         # self.data_range = None
         self.mapper = None
+
         self.mean = None
         self.std = None
+        self.kurtosis = None
+        self.symmetry = None
+        self.choice_math_val = None
 
         # D A T E S - F R A M E
         self.from_date = None
         self.to_date = None
         self.ok_var = tk.IntVar()
         self.frm_cells = None
-        self.choice_var = None
+        self.choice_plane_var = None
+        self.choice_cmap = None
 
         self.choose_dates()
 
@@ -114,33 +131,55 @@ class CellsApp:
         frm_dates = tk.Frame(master=self.window)
         frm_dates.pack(fill=tk.X, expand=True)
 
-        lbl_dates = tk.Label(master=frm_dates, text='Choose dates:')
+        lbl_dates = tk.Label(master=frm_dates, text='Choose dates \"dd/mm/yyyy\":')
 
         lbl_from = tk.Label(master=frm_dates, text='From: ')
-        cal_from = DateEntry(master=frm_dates, width=12, background='darkblue',
+        cal_from = DateEntry(master=frm_dates, width=12, background='red', date_pattern="dd/mm/yyyy",
                              foreground='white', borderwidth=2)
+
         lbl_to = tk.Label(master=frm_dates, text='To: ')
-        cal_to = DateEntry(master=frm_dates, width=12, background='darkblue',
+        cal_to = DateEntry(master=frm_dates, width=12, background='green', date_pattern="dd/mm/yyyy",
                            foreground='white', borderwidth=2)
 
         btn_draw = tk.Button(master=frm_dates, text="Ok",
                              command=lambda a=cal_from, b=cal_to: self.refresh_cells(a, b))
 
         lbl_plane = tk.Label(master=frm_dates, text="Plane: ")
-        option_list = ["T1", "T3", "T4"]
-        self.choice_var = tk.StringVar(master=frm_dates)
-        self.choice_var.set(option_list[0])
-        opt_plane_name = tk.OptionMenu(frm_dates, self.choice_var, *option_list)
+        option_list_plane = ["T1", "T3", "T4"]
+        self.choice_plane_var = tk.StringVar(master=frm_dates)
+        self.choice_plane_var.set(option_list_plane[0])
+        opt_plane_name = tk.OptionMenu(frm_dates, self.choice_plane_var, *option_list_plane)
+
+        lbl_var_color = tk.Label(master=frm_dates, text="Variable to color: ")
+        option_list_var = ["mean", "deviation", "kurtosis", "symmetry"]
+        self.choice_math_val = tk.StringVar(master=frm_dates)
+        self.choice_math_val.set(option_list_var[0])
+        opt_variable_color = tk.OptionMenu(frm_dates, self.choice_math_val, *option_list_var)
+
+        lbl_cmap = tk.Label(master=frm_dates, text="Color map: ")
+        option_list_cmap = ["jet", "inferno", "plasma", "Pastel2",
+                            "copper", "cool", "gist_rainbow",
+                            "viridis", "winter", "twilight"]
+        self.choice_cmap = tk.StringVar(master=frm_dates)
+        self.choice_cmap.set(option_list_cmap[1])
+        opt_variable_cmap = tk.OptionMenu(frm_dates, self.choice_cmap, *option_list_cmap)
 
         lbl_dates.grid(row=0, column=0, columnspan=2)
         lbl_from.grid(row=1, column=0)
         cal_from.grid(row=1, column=1)
         lbl_to.grid(row=2, column=0)
         cal_to.grid(row=2, column=1)
-        
+
         lbl_plane.grid(row=0, column=2)
         opt_plane_name.grid(row=1, column=2, rowspan=2)
-        btn_draw.grid(row=1, column=3, rowspan=2)
+
+        lbl_var_color.grid(row=0, column=3)
+        opt_variable_color.grid(row=1, column=3, rowspan=2)
+
+        lbl_cmap.grid(row=0, column=4)
+        opt_variable_cmap.grid(row=1, column=4, rowspan=2)
+
+        btn_draw.grid(row=1, column=5, rowspan=2)
 
         frm_dates.wait_variable(self.ok_var)
 
@@ -160,23 +199,42 @@ class CellsApp:
                 )
                 frm_cell.grid(row=i, column=j, sticky="news")
 
-                mean, std = self.get_mean(i, j), self.get_std(i, j)
-                bg_color, fg_color = self.set_button_colors(mean)
+                # mean, std = self.get_mean(i, j), self.get_std(i, j)
+
+                numpy_value = self.get_math_value(val=self.choice_math_val.get())[i, j]
+                bg_color, fg_color = self.set_button_colors(numpy_value)
                 btn_plot = tk.Button(master=frm_cell,
-                                     text=f"{mean:.1f}\n\xB1{std:.1f}",
+                                     text=f"{self.get_math_value(val='mean')[i, j]:.0f}"
+                                          f"\n\xB1"
+                                          f"{self.get_math_value(val='deviation')[i, j]:.0f}",
                                      height=2, width=3,
                                      bg=bg_color, fg=fg_color,
                                      command=lambda a=i, b=j: self.cell_button(a, b))
                 btn_plot.pack(fill=tk.BOTH)
 
-    def set_button_colors(self, mean):
-        # colormap possible values = viridis, jet, spectral
-        rgba_color = self.mapper.to_rgba(mean)
+    def set_button_colors(self, val: float):
+        # Management of background color (button)
+        var_array = self.get_math_value(val=self.choice_math_val.get())
+        rgba_color = self.mapper.to_rgba(val)
         bg_color = to_hex(rgba_color[:-1])
-        if np.min(self.mean) <= mean < np.mean(self.mean):
-            fg_color = "#FFFFFF"
+
+        # Management of foreground color (words)
+        condition = np.min(var_array) <= val < np.mean(var_array)
+        # dark on high values
+        if self.choice_cmap.get() in ["inferno", "copper", "viridris", "winter", "jet", "plasma", "viridis"]:
+            if condition:
+                fg_color = "#FFFFFF"
+            else:
+                fg_color = "#000000"
+        # light on high values
+        elif self.choice_cmap.get() in ["cool", "twilight"]:
+            if condition:
+                fg_color = "#000000"
+            else:
+                fg_color = "#FFFFFF"
         else:
             fg_color = "#000000"
+
         return bg_color, fg_color
 
     def refresh_cells(self, cal_from, cal_to):
@@ -185,8 +243,11 @@ class CellsApp:
         self.from_date = cal_from.get_date()
         self.to_date = cal_to.get_date()
 
-        self.plane_name = self.choice_var.get()
+        self.plane_name = self.choice_plane_var.get()
 
+        # TODO: Crear un método update para CookData en el que se metan estos valores,
+        #  pero inicializarlo en CellViewer.__init__() para poder acceder a sus valores
+        #  en cualquier parte de CellViewer sin necesidad de definir self.mean, self.std...
         cooked_data = CookData(data_dir=self.main_data_dir,
                                from_date=self.from_date, to_date=self.to_date,
                                plane_name=self.plane_name,
@@ -195,10 +256,13 @@ class CellsApp:
 
         self.mean = cooked_data.mean
         self.std = cooked_data.std
+        self.kurtosis = cooked_data.kurtosis
+        self.symmetry = cooked_data.symmetry
 
         # normalize item number values to colormap
-        norm = Normalize(vmin=np.min(self.mean), vmax=np.max(self.mean))
-        self.mapper = cm.ScalarMappable(norm=norm, cmap="inferno")
+        numpy_value = self.get_math_value(val=self.choice_math_val.get())
+        norm = Normalize(vmin=np.min(numpy_value), vmax=np.max(numpy_value))
+        self.mapper = cm.ScalarMappable(norm=norm, cmap=self.choice_cmap.get())
 
         try:
             self.frm_cells.destroy()
@@ -226,6 +290,7 @@ class CellsApp:
 
         plt.show()
 
+    '''
     def get_mean(self, row_id, col_id):
         if self.from_date is None or self.to_date is None:
             return 0
@@ -237,6 +302,33 @@ class CellsApp:
             return 0
         else:
             return self.std[row_id, col_id]
+
+    def get_kurtosis(self, row_id, col_id):
+        if self.from_date is None or self.to_date is None:
+            return 0
+        else:
+            return self.kurtosis[row_id, col_id]
+
+    def get_symmetry(self, row_id, col_id):
+        if self.from_date is None or self.to_date is None:
+            return 0
+        else:
+            return self.symmetry[row_id, col_id]
+    '''
+
+    def get_math_value(self, val: str) -> np.array:
+        if self.from_date is None or self.to_date is None:
+            return 0
+        if val == "mean":
+            return self.mean
+        elif val == "deviation":
+            return self.std
+        elif val == "kurtosis":
+            return self.kurtosis
+        elif val == "symmetry":
+            return self.symmetry
+        else:
+            raise Exception("Failed val in get_math_value()")
 
     def window_config(self, window_title):
         if window_title is None:
