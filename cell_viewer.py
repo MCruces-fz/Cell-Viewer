@@ -30,8 +30,6 @@ from const import DATA_DIR
 #    - En lugar de tomar los archivos.dat, utilizar las cargas de los hld y
 #    representarlos por cuartiles.
 #    - Poder escoger fecha y hora para el rango de análisis.
-#    - Change name skewness -> skewness
-#    - Change order to: mean, sigma, skewness, kurtosis
 
 class CookData:
     def __init__(self, data_dir: str = DATA_DIR, from_date=None, to_date=None,
@@ -219,10 +217,26 @@ class CellsApp:
                 bg_color, fg_color = self.set_button_colors(numpy_value)
                 btn_plot = tk.Button(master=frm_cell,
                                      text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
-                                     height=2, width=3,
+                                     height=2, width=4,
                                      bg=bg_color, fg=fg_color,
                                      command=lambda a=i, b=j: self.cell_button(a, b))
-                btn_plot.pack(fill=tk.BOTH)
+                if j != 5 and i != 4:
+                    btn_plot.pack(fill=tk.BOTH, expand=True)
+                elif j == 5 and i != 4:
+                    v_sep = tk.Label(master=frm_cell, text="   ")
+                    btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+                    v_sep.pack(fill=tk.BOTH, side=tk.RIGHT)
+                elif i == 4 and j != 5:
+                    h_sep = tk.Label(master=frm_cell)
+                    btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.TOP)
+                    h_sep.pack(fill=tk.BOTH, side=tk.BOTTOM)
+                else:  # i == 4 and j == 5
+                    v_sep = tk.Label(master=frm_cell, text="   ")
+                    h_sep = tk.Label(master=frm_cell)
+                    btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+                    btn_plot.grid(row=0, column=0)
+                    v_sep.grid(row=0, column=1)
+                    h_sep.grid(row=1, column=0)
 
     def set_button_colors(self, val: float):
         """
@@ -231,7 +245,6 @@ class CellsApp:
         :return: Colors for button background (bg_color) and button value (fg_color)
         """
         # Management of background color (button)
-        var_array = self.get_math_value(val=self.choice_math_val.get())
         rgba_color = self.mapper.to_rgba(val)
         rgb_color = rgba_color[:-1]
         bg_color = to_hex(rgb_color)
