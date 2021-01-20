@@ -30,6 +30,8 @@ from const import DATA_DIR
 #    - En lugar de tomar los archivos.dat, utilizar las cargas de los hld y
 #    representarlos por cuartiles.
 #    - Poder escoger fecha y hora para el rango de análisis.
+#    - Change name skewness -> skewness
+#    - Change order to: mean, sigma, skewness, kurtosis
 
 class CookData:
     def __init__(self, data_dir: str = DATA_DIR, from_date=None, to_date=None,
@@ -49,7 +51,7 @@ class CookData:
         self.mean = self.all_data.mean(axis=0)
         self.std = self.all_data.std(axis=0)
         self.kurtosis = kurtosis(self.all_data, axis=0)
-        self.symmetry = skew(self.all_data, axis=0)  # skew = 0 -> 100% symmetric
+        self.skewness = skew(self.all_data, axis=0)  # skew = 0 -> 100% symmetric
 
     def set_full_rate_paths(self):
         dir_1 = self.from_date.strftime("%y%j")
@@ -109,7 +111,7 @@ class CellsApp:
         self.mean = None
         self.std = None
         self.kurtosis = None
-        self.symmetry = None
+        self.skewness = None
         self.choice_math_val = None
 
         # D A T E S - F R A M E
@@ -154,7 +156,7 @@ class CellsApp:
         opt_plane_name = tk.OptionMenu(frm_options, self.choice_plane_var, *option_list_plane)
 
         lbl_var_color = tk.Label(master=frm_options, text="Variable to color: ")
-        option_list_var = ["mean", "deviation", "kurtosis", "symmetry"]
+        option_list_var = ["mean", "sigma", "kurtosis", "skewness"]
         self.choice_math_val = tk.StringVar(master=frm_options)
         self.choice_math_val.set(option_list_var[0])
         opt_variable_color = tk.OptionMenu(frm_options, self.choice_math_val, *option_list_var)
@@ -231,24 +233,12 @@ class CellsApp:
         # Management of background color (button)
         var_array = self.get_math_value(val=self.choice_math_val.get())
         rgba_color = self.mapper.to_rgba(val)
-        bg_color = to_hex(rgba_color[:-1])
+        rgb_color = rgba_color[:-1]
+        bg_color = to_hex(rgb_color)
 
         # Management of foreground color (words)
-        condition = np.min(var_array) <= val < np.mean(var_array)
-        # dark on high values
-        if self.choice_cmap.get() in ["inferno", "copper", "viridris", "winter", "jet", "plasma", "viridis"]:
-            if condition:
-                fg_color = "#FFFFFF"
-            else:
-                fg_color = "#000000"
-        # light on high values
-        elif self.choice_cmap.get() in ["cool", "twilight"]:
-            if condition:
-                fg_color = "#000000"
-            else:
-                fg_color = "#FFFFFF"
-        else:
-            fg_color = "#000000"
+        inv_rgb_color = (1 - rgb_color[0], 1 - rgb_color[1], 1 - rgb_color[2])
+        fg_color = to_hex(inv_rgb_color)  # Foreground is inverted color of background
 
         return bg_color, fg_color
 
@@ -272,7 +262,7 @@ class CellsApp:
         self.mean = cooked_data.mean
         self.std = cooked_data.std
         self.kurtosis = cooked_data.kurtosis
-        self.symmetry = cooked_data.symmetry
+        self.skewness = cooked_data.skewness
 
         # normalize item number values to colormap
         numpy_value = self.get_math_value(val=self.choice_math_val.get())
@@ -329,7 +319,7 @@ class CellsApp:
         if self.from_date is None or self.to_date is None:
             return 0
         else:
-            return self.symmetry[row_id, col_id]
+            return self.skewness[row_id, col_id]
     '''
 
     def get_math_value(self, val: str) -> np.array:
@@ -337,12 +327,12 @@ class CellsApp:
             return 0
         if val == "mean":
             return self.mean
-        elif val == "deviation":
+        elif val == "sigma":
             return self.std
+        elif val == "skewness":
+            return self.skewness
         elif val == "kurtosis":
             return self.kurtosis
-        elif val == "symmetry":
-            return self.symmetry
         else:
             raise Exception("Failed val in get_math_value()")
 
