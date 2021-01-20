@@ -24,13 +24,12 @@ from const import DATA_DIR
 
 
 # TODO:
-#    - Quitar decimales de los númros en las celdas
-#    - Formato de fecha dd/mm/yy
-#    - Color en función de STD. y quitarla de los
-#    botones para mayor visibilidad
-#    - Cambiar color map a arcoiris
-#    - En un futuro hacer más botones para escoger
-#    distintas cofiguracioes de colores y datos mostrados
+#    - Barra de CMap a la derecha, para entender los colores
+#    - Convertir a Hz los valores (creo que se va a quedar para cuando lea los hld)
+#    y fijar los colores desde 0Hz hasta 2Hz (con valores superiores saturando)
+#    - En lugar de tomar los archivos.dat, utilizar las cargas de los hld y
+#    representarlos por cuartiles.
+#    - Poder escoger fecha y hora para el rango de análisis.
 
 class CookData:
     def __init__(self, data_dir: str = DATA_DIR, from_date=None, to_date=None,
@@ -127,62 +126,76 @@ class CellsApp:
         self.main_loop()
 
     def choose_dates(self):
-        frm_dates = tk.Frame(master=self.window)
-        frm_dates.pack(fill=tk.X, expand=True)
+        """
+        This sets the frame where the buttons to choose options are placed.
+        """
+        # FRAME THAT ENCLOSES  E V E R Y T H I N G  E L S E  (all options)
+        frm_options = tk.Frame(master=self.window)
+        frm_options.pack(fill=tk.X, expand=True)
 
-        lbl_dates = tk.Label(master=frm_dates, text='Choose dates \"dd/mm/yyyy\":')
+        # CHOOSE DATE-TIME OPTIONS
+        # Label: "Choose dates 'dd/mm/yyyy'"
+        lbl_dates = tk.Label(master=frm_options, text='Choose dates \"dd/mm/yyyy\":')
 
-        lbl_from = tk.Label(master=frm_dates, text='From: ')
-        cal_from = DateEntry(master=frm_dates, width=12, background='red', date_pattern="dd/mm/yyyy",
+        # Entry "From" date
+        lbl_from = tk.Label(master=frm_options, text='From: ')
+        cal_from = DateEntry(master=frm_options, width=12, background='red', date_pattern="dd/mm/yyyy",
                              foreground='white', borderwidth=2)
 
-        lbl_to = tk.Label(master=frm_dates, text='To: ')
-        cal_to = DateEntry(master=frm_dates, width=12, background='green', date_pattern="dd/mm/yyyy",
+        # Entry "To" date
+        lbl_to = tk.Label(master=frm_options, text='To: ')
+        cal_to = DateEntry(master=frm_options, width=12, background='green', date_pattern="dd/mm/yyyy",
                            foreground='white', borderwidth=2)
 
-        btn_draw = tk.Button(master=frm_dates, text="Ok",
-                             command=lambda a=cal_from, b=cal_to: self.refresh_cells(a, b))
-
-        lbl_plane = tk.Label(master=frm_dates, text="Plane: ")
+        lbl_plane = tk.Label(master=frm_options, text="Plane: ")
         option_list_plane = ["T1", "T3", "T4"]
-        self.choice_plane_var = tk.StringVar(master=frm_dates)
+        self.choice_plane_var = tk.StringVar(master=frm_options)
         self.choice_plane_var.set(option_list_plane[0])
-        opt_plane_name = tk.OptionMenu(frm_dates, self.choice_plane_var, *option_list_plane)
+        opt_plane_name = tk.OptionMenu(frm_options, self.choice_plane_var, *option_list_plane)
 
-        lbl_var_color = tk.Label(master=frm_dates, text="Variable to color: ")
+        lbl_var_color = tk.Label(master=frm_options, text="Variable to color: ")
         option_list_var = ["mean", "deviation", "kurtosis", "symmetry"]
-        self.choice_math_val = tk.StringVar(master=frm_dates)
+        self.choice_math_val = tk.StringVar(master=frm_options)
         self.choice_math_val.set(option_list_var[0])
-        opt_variable_color = tk.OptionMenu(frm_dates, self.choice_math_val, *option_list_var)
+        opt_variable_color = tk.OptionMenu(frm_options, self.choice_math_val, *option_list_var)
 
-        lbl_cmap = tk.Label(master=frm_dates, text="Color map: ")
+        lbl_cmap = tk.Label(master=frm_options, text="Color map: ")
         option_list_cmap = ["jet", "inferno", "plasma", "Pastel2",
                             "copper", "cool", "gist_rainbow",
                             "viridis", "winter", "twilight"]
-        self.choice_cmap = tk.StringVar(master=frm_dates)
+        self.choice_cmap = tk.StringVar(master=frm_options)
         self.choice_cmap.set(option_list_cmap[1])
-        opt_variable_cmap = tk.OptionMenu(frm_dates, self.choice_cmap, *option_list_cmap)
+        opt_variable_cmap = tk.OptionMenu(frm_options, self.choice_cmap, *option_list_cmap)
 
+        # OK Button!
+        btn_draw = tk.Button(master=frm_options, text="Ok",
+                             command=lambda a=cal_from, b=cal_to: self.refresh_cells(a, b))
+
+        # - G R I D -
         lbl_dates.grid(row=0, column=0, columnspan=2)
         lbl_from.grid(row=1, column=0)
         cal_from.grid(row=1, column=1)
         lbl_to.grid(row=2, column=0)
         cal_to.grid(row=2, column=1)
 
-        lbl_plane.grid(row=0, column=2)
-        opt_plane_name.grid(row=1, column=2, rowspan=2)
+        lbl_plane.grid(row=3, column=0)
+        opt_plane_name.grid(row=4, column=0, rowspan=2)
 
-        lbl_var_color.grid(row=0, column=3)
-        opt_variable_color.grid(row=1, column=3, rowspan=2)
+        lbl_var_color.grid(row=3, column=1)
+        opt_variable_color.grid(row=4, column=1, rowspan=2)
 
-        lbl_cmap.grid(row=0, column=4)
-        opt_variable_cmap.grid(row=1, column=4, rowspan=2)
+        lbl_cmap.grid(row=3, column=2)  # (row=0, column=4)
+        opt_variable_cmap.grid(row=4, column=2, rowspan=2)
 
-        btn_draw.grid(row=1, column=5, rowspan=2)
+        btn_draw.grid(row=6, column=0, columnspan=3)
 
-        frm_dates.wait_variable(self.ok_var)
+        # Wait while self.refresh_cells() method is not executed (pressing "Ok" button)
+        frm_options.wait_variable(self.ok_var)
 
     def draw_cells(self):
+        """
+        This sets the frame where the cell buttons are placed
+        """
         self.frm_cells = tk.Frame(master=self.window)
         self.frm_cells.pack(fill=tk.BOTH, expand=True)
 
@@ -210,6 +223,11 @@ class CellsApp:
                 btn_plot.pack(fill=tk.BOTH)
 
     def set_button_colors(self, val: float):
+        """
+        This method is used for choose the color for each value in the cell buttons.
+        :param val: Value of each button.
+        :return: Colors for button background (bg_color) and button value (fg_color)
+        """
         # Management of background color (button)
         var_array = self.get_math_value(val=self.choice_math_val.get())
         rgba_color = self.mapper.to_rgba(val)
