@@ -12,13 +12,15 @@ https://stackoverflow.com/questions/10865116/tkinter-creating-buttons-in-for-loo
 """
 import numpy as np
 from scipy.stats import kurtosis, skew
-from tkinter_modules import tk, DateEntry
+from tkinter_modules import tk, ttk, DateEntry
 import os
 from os.path import join as join_path
 import datetime
 
 from matplotlib import cm
+from matplotlib.figure import Figure
 from matplotlib.colors import Normalize, to_hex
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from const import DATA_DIR
 
@@ -117,6 +119,7 @@ class CellsApp:
         self.to_date = None
         self.ok_var = tk.IntVar()
         self.frm_cells = None
+        self.frm_colormap = None
         self.choice_plane_var = None
         self.choice_cmap = None
 
@@ -164,7 +167,7 @@ class CellsApp:
                             "copper", "cool", "gist_rainbow",
                             "viridis", "winter", "twilight"]
         self.choice_cmap = tk.StringVar(master=frm_options)
-        self.choice_cmap.set(option_list_cmap[1])
+        self.choice_cmap.set(option_list_cmap[0])
         opt_variable_cmap = tk.OptionMenu(frm_options, self.choice_cmap, *option_list_cmap)
 
         # OK Button!
@@ -191,6 +194,39 @@ class CellsApp:
 
         # Wait while self.refresh_cells() method is not executed (pressing "Ok" button)
         frm_options.wait_variable(self.ok_var)
+
+    # def draw_colormap_bar(self):
+    #     """
+    #     This sets the frame where the buttons to choose options are placed.
+    #     """
+    #     # FRAME THAT ENCLOSES  E V E R Y T H I N G  E L S E  (all options)
+    #     self.frm_colormap = tk.Frame(master=self.window)
+    #     self.frm_colormap.pack(fill=tk.X, expand=True)
+    #
+    #     plt.figure()
+    #     fig, ax = plt.subplots()
+    #     fig.colorbar(self.mapper, ax=ax, orientation="horizontal")  # , fraction=0.046, pad=0.04)
+    #     ax.remove()
+    #     canvas = FigureCanvasTkAgg(master=self.frm_colormap, figure=fig)  # (fig, master)
+    #
+    #     canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+    def draw_colormap_bar(self, min, max):
+        """
+        This sets the frame where the buttons to choose options are placed.
+        """
+        # FRAME THAT ENCLOSES  E V E R Y T H I N G  E L S E  (all options)
+        self.frm_colormap = tk.Frame(master=self.window)
+        self.frm_colormap.pack(fill=tk.X, expand=True)
+
+        step = int((max - min)/20)
+        min, max = int(min), int(max)
+
+        for val in range(min, max, step):
+            rgba_color = self.mapper.to_rgba(val)
+            rgb_color = rgba_color[:-1]
+            bg_color = to_hex(rgb_color)
+            tk.Label(master=self.frm_colormap, bg=bg_color).pack(fill=tk.X, expand=True, side=tk.RIGHT)
 
     def draw_cells(self):
         """
@@ -233,7 +269,7 @@ class CellsApp:
                 else:  # i == 4 and j == 5
                     v_sep = tk.Label(master=frm_cell, text="   ")
                     h_sep = tk.Label(master=frm_cell)
-                    btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
+                    # btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
                     btn_plot.grid(row=0, column=0)
                     v_sep.grid(row=0, column=1)
                     h_sep.grid(row=1, column=0)
@@ -279,14 +315,22 @@ class CellsApp:
 
         # normalize item number values to colormap
         numpy_value = self.get_math_value(val=self.choice_math_val.get())
-        norm = Normalize(vmin=np.min(numpy_value), vmax=np.max(numpy_value))
+        min = np.min(numpy_value)
+        max = np.max(numpy_value)
+        norm = Normalize(vmin=min, vmax=max)
         self.mapper = cm.ScalarMappable(norm=norm, cmap=self.choice_cmap.get())
 
         try:
             self.frm_cells.destroy()
         except AttributeError:
             pass
+        try:
+            self.frm_colormap.destroy()
+        except AttributeError:
+            pass
+
         self.draw_cells()
+        self.draw_colormap_bar(min, max)
 
     def cell_button(self, row_id, col_id):
 
