@@ -1,4 +1,4 @@
-from const import *
+from utils.const import *
 import os
 
 print("remember to update the directory DATA_DIR to your desired place")
