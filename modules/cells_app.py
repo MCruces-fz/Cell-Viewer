@@ -4,30 +4,36 @@ from utils.tkinter_modules import tk, DateEntry
 from matplotlib import cm
 from matplotlib.colors import Normalize, to_hex
 import matplotlib.pyplot as plt
-from utils.const import DATA_DIR
-from modules.cook_ascii import CookData
+from utils.const import *
 
 
 class CellsApp:
-    def __init__(self, window_title=None, data_dir: str = DATA_DIR):
+    def __init__(self, chef_object: object, window_title=None):
+        """
+        Constructor of the GUI
+
+        :param chef_object: Object to get data. It has to have the following:
+            - METHOD:
+                * update(from_date, to_date, plane_name)
+            - ATTRIBUTES:
+                * all_data
+                * mean
+                * std
+                * skewness
+                * kurtosis
+        :param window_title: (optional) String with the title of the window
+        """
+
+        # L A Y O U T
         self.window = tk.Tk()
         self.window_config(window_title)
 
-        self.main_data_dir = data_dir
-
-        self.plane_rows = 10
-        self.plane_cols = 12
+        self.inp_dt = chef_object  # Input Data
 
         # D A T A - N E E D E D
         self.plane_name = "T1"
-        self.all_data = None
-        # self.data_range = None
         self.mapper = None
 
-        self.mean = None
-        self.std = None
-        self.kurtosis = None
-        self.skewness = None
         self.choice_math_val = None
 
         # D A T E S - F R A M E
@@ -111,23 +117,7 @@ class CellsApp:
         # Wait while self.refresh_cells() method is not executed (pressing "Ok" button)
         frm_options.wait_variable(self.ok_var)
 
-    # def draw_colormap_bar(self):
-    #     """
-    #     This sets the frame where the buttons to choose options are placed.
-    #     """
-    #     # FRAME THAT ENCLOSES  E V E R Y T H I N G  E L S E  (all options)
-    #     self.frm_colormap = tk.Frame(master=self.window)
-    #     self.frm_colormap.pack(fill=tk.X, expand=True)
-    #
-    #     plt.figure()
-    #     fig, ax = plt.subplots()
-    #     fig.colorbar(self.mapper, ax=ax, orientation="horizontal")  # , fraction=0.046, pad=0.04)
-    #     ax.remove()
-    #     canvas = FigureCanvasTkAgg(master=self.frm_colormap, figure=fig)  # (fig, master)
-    #
-    #     canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-
-    def draw_colormap_bar(self, min, max):
+    def draw_colormap_bar(self, min_val, max_val):
         """
         This sets the frame where the buttons to choose options are placed.
         """
@@ -135,10 +125,10 @@ class CellsApp:
         self.frm_colormap = tk.Frame(master=self.window)
         self.frm_colormap.pack(fill=tk.X, expand=True)
 
-        step = int((max - min)/20)
-        min, max = int(min), int(max)
+        step = int((max_val - min_val) / 20)
+        min_val, max_val = int(min_val), int(max_val)
 
-        for val in range(min, max, step):
+        for val in range(min_val, max_val, step):
             rgba_color = self.mapper.to_rgba(val)
             rgb_color = rgba_color[:-1]
             bg_color = to_hex(rgb_color)
@@ -151,11 +141,11 @@ class CellsApp:
         self.frm_cells = tk.Frame(master=self.window)
         self.frm_cells.pack(fill=tk.BOTH, expand=True)
 
-        tk.Grid.rowconfigure(self.frm_cells, index=list(range(self.plane_rows)), weight=1, minsize=0)
-        tk.Grid.columnconfigure(self.frm_cells, index=list(range(self.plane_cols)), weight=1, minsize=0)
+        tk.Grid.rowconfigure(self.frm_cells, index=list(range(NROW)), weight=1, minsize=0)
+        tk.Grid.columnconfigure(self.frm_cells, index=list(range(NCOL)), weight=1, minsize=0)
 
-        for i in range(self.plane_rows):
-            for j in range(self.plane_cols):
+        for i in range(NROW):
+            for j in range(NCOL):
                 frm_cell = tk.Frame(
                     master=self.frm_cells,
                     # relief=tk.RAISED,
@@ -215,25 +205,14 @@ class CellsApp:
 
         self.plane_name = self.choice_plane_var.get()
 
-        # TODO: Crear un método update para CookData en el que se metan estos valores,
-        #  pero inicializarlo en CellViewer.__init__() para poder acceder a sus valores
-        #  en cualquier parte de CellViewer sin necesidad de definir self.mean, self.std...
-        cooked_data = CookData(data_dir=self.main_data_dir,
-                               from_date=self.from_date, to_date=self.to_date,
-                               plane_name=self.plane_name,
-                               plane_rows=self.plane_rows, plane_cols=self.plane_cols)
-        self.all_data = cooked_data.all_data
-
-        self.mean = cooked_data.mean
-        self.std = cooked_data.std
-        self.kurtosis = cooked_data.kurtosis
-        self.skewness = cooked_data.skewness
+        self.inp_dt.update(from_date=self.from_date, to_date=self.to_date,
+                           plane_name=self.plane_name)
 
         # normalize item number values to colormap
         numpy_value = self.get_math_value(val=self.choice_math_val.get())
-        min = np.min(numpy_value)
-        max = np.max(numpy_value)
-        norm = Normalize(vmin=min, vmax=max)
+        min_val = np.min(numpy_value)
+        max_val = np.max(numpy_value)
+        norm = Normalize(vmin=min_val, vmax=max_val)
         self.mapper = cm.ScalarMappable(norm=norm, cmap=self.choice_cmap.get())
 
         try:
@@ -246,13 +225,13 @@ class CellsApp:
             pass
 
         self.draw_cells()
-        self.draw_colormap_bar(min, max)
+        self.draw_colormap_bar(min_val, max_val)
 
     def cell_button(self, row_id, col_id):
 
-        all_hits = self.all_data[:, row_id, col_id]
-        mean = self.mean[row_id, col_id]
-        std = self.std[row_id, col_id]
+        all_hits = self.inp_dt.all_data[:, row_id, col_id]
+        mean = self.inp_dt.mean[row_id, col_id]
+        std = self.inp_dt.std[row_id, col_id]
 
         plt.figure(f"cell ({row_id}, {col_id})")
         plt.title(f"Plane {self.plane_name} - Cell index ({row_id}, {col_id})")
@@ -269,43 +248,17 @@ class CellsApp:
 
         plt.show()
 
-    '''
-    def get_mean(self, row_id, col_id):
-        if self.from_date is None or self.to_date is None:
-            return 0
-        else:
-            return self.mean[row_id, col_id]
-
-    def get_std(self, row_id, col_id):
-        if self.from_date is None or self.to_date is None:
-            return 0
-        else:
-            return self.std[row_id, col_id]
-
-    def get_kurtosis(self, row_id, col_id):
-        if self.from_date is None or self.to_date is None:
-            return 0
-        else:
-            return self.kurtosis[row_id, col_id]
-
-    def get_symmetry(self, row_id, col_id):
-        if self.from_date is None or self.to_date is None:
-            return 0
-        else:
-            return self.skewness[row_id, col_id]
-    '''
-
     def get_math_value(self, val: str) -> np.array:
         if self.from_date is None or self.to_date is None:
             return 0
         if val == "mean":
-            return self.mean
+            return self.inp_dt.mean
         elif val == "sigma":
-            return self.std
+            return self.inp_dt.std
         elif val == "skewness":
-            return self.skewness
+            return self.inp_dt.skewness
         elif val == "kurtosis":
-            return self.kurtosis
+            return self.inp_dt.kurtosis
         else:
             raise Exception("Failed val in get_math_value()")
 

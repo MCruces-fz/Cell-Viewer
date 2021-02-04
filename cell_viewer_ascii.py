@@ -14,6 +14,8 @@ https://stackoverflow.com/questions/10865116/tkinter-creating-buttons-in-for-loo
 """
 
 from modules.cells_app import CellsApp
+from modules.cook_ascii import CookDataASCII
+from utils.const import DATA_DIR
 
 # TODO:
 #    - Barra de CMap a la derecha, para entender los colores
@@ -25,4 +27,5 @@ from modules.cells_app import CellsApp
 
 
 if __name__ == "__main__":
-    CellsApp()
+    cook_data = CookDataASCII(data_dir=DATA_DIR)
+    CellsApp(chef_object=cook_data)

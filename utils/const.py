@@ -5,3 +5,6 @@
 """
 
 DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/png/"
+
+NROW = 10
+NCOL = 12
