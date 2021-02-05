@@ -1,6 +1,18 @@
 # Cell Viewer
 Graphical User Interface to view stats about the TRASGO detectors easily.
 
+```
+         _______________________
+       //                       \
+      //       M I G U E L       \
+     //        C R U C E S        \
+    //                             \
+   //                               \
+  //       mcruces.fz@gmail.com      \
+  \  miguel.cruces.fernandez@usc.es //
+   \_______________________________//
+```
+
 ## Motherboard disposition
 
 ### TRAGALDABAS

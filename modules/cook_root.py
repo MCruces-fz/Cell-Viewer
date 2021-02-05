@@ -75,8 +75,8 @@ class CookDataROOT(Chef):
         #  Como argumento obligatorio deben tener el frame en el que se debe acomodar
 
         # Delete when finished
-        self.from_date = datetime.datetime(year=2020, month=4, day=3, hour=12, minute=30)
-        self.to_date = datetime.datetime(year=2020, month=4, day=3, hour=15, minute=23)
+        # self.from_date = datetime.datetime(year=2020, month=4, day=3, hour=12, minute=30)
+        # self.to_date = datetime.datetime(year=2020, month=4, day=3, hour=15, minute=23)
 
         file_from = self.from_date.strftime("%y%j%H%M")
         file_to = self.to_date.strftime("%y%j%H%M")
@@ -84,13 +84,17 @@ class CookDataROOT(Chef):
         tstamp_from = int(file_from)
         tstamp_to = int(file_to)
 
-        for filename in os.listdir(ROOT_DATA_DIR):
+        # Clear Data
+        self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
+
+        for filename in sorted(os.listdir(ROOT_DATA_DIR)):
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
-                print(filename)
                 # Input Filename
                 input_full_path = join_path(self.main_data_dir, filename)
                 self.get_hits_array(input_full_path)
+                print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
+        print("100%\tdone")
 
         return self.all_data
 
@@ -107,7 +111,8 @@ class CookDataROOT(Chef):
         nentries = tree.GetEntries()
         # print(f"Number of entries: {nentries}")
 
-        trbnum = 2  # TRB_TAB[self.plane_name]
+        trbnum = TRB_TAB[self.plane_name]
+        # print(trbnum)
 
         col_branch = rnp.tree2array(tree=tree,
                                     branches="rpcraw.fCol",
@@ -134,5 +139,6 @@ class CookDataROOT(Chef):
         super().update(from_date, to_date, plane_name)
 
         # FIXME: It won't work if there is missing data in range (mean will be wrong)
+        #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
         time_diff = self.to_date - self.from_date
         self.mean = self.all_data / time_diff.total_seconds()

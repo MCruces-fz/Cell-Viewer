@@ -37,84 +37,106 @@ class CellsApp:
         :param window_title: (optional) String with the title of the window
         """
 
-        # L A Y O U T
+        #  --- L A Y O U T ---
+        # M A I N   W I N D O W
         self.window = tk.Tk()
+        # Configuration:
         self.window_config(window_title)
 
-        self.inp_dt = chef_object  # Input Data
+        # Object of Input Data
+        self.inp_dt = chef_object
+
+        # F R A M E S
+        self.frm_options = tk.Frame(master=self.window)
+        self.frm_datime = tk.Frame(master=self.frm_options)
+        self.frm_cells = None
+        self.frm_colormap = None
 
         # D A T A - N E E D E D
         self.plane_name = "T1"
         self.mapper = None
 
-        self.choice_math_val = None
+        #     V A R I A B L E
+        # D E C L A R A T I O N S
 
-        # D A T E S - F R A M E
         self.from_date = None
         self.to_date = None
-        self.ok_var = tk.IntVar()
-        self.frm_cells = None
-        self.frm_colormap = None
+
+        self.cal_from = None
+        self.cal_to = None
+
+        self.choice_math_val = None
         self.choice_plane_var = None
+
+        self.ok_var = tk.IntVar()
+
         self.choice_cmap = None
 
-        self.choose_dates()
+        self.choose_options()
+
+        # Wait while self.refresh_cells() method is not executed (pressing "Ok" button)
+        self.frm_options.wait_variable(self.ok_var)
 
         # M A I N - L O O P
         self.main_loop()
 
-    def choose_dates(self):
+    def choose_options(self):
         """
         This sets the frame where the buttons to choose options are placed.
         """
         # FRAME THAT ENCLOSES  E V E R Y T H I N G  E L S E  (all options)
-        frm_options = tk.Frame(master=self.window)
-        frm_options.pack(fill=tk.X, expand=True)
+        self.frm_options.pack(fill=tk.X, expand=True)
 
         # CHOOSE DATE-TIME OPTIONS
         # Label: "Choose dates 'dd/mm/yyyy'"
-        lbl_dates = tk.Label(master=frm_options, text='Choose dates \"dd/mm/yyyy\":')
+        lbl_dates = tk.Label(master=self.frm_datime, text='Date \"dd/mm/yyyy\"')
 
         # Entry "From" date
-        lbl_from = tk.Label(master=frm_options, text='From: ')
-        cal_from = DateEntry(master=frm_options, width=12, background='red', date_pattern="dd/mm/yyyy",
-                             foreground='white', borderwidth=2)
+        lbl_from = tk.Label(master=self.frm_datime, text='From: ')
+        self.cal_from = DateEntry(master=self.frm_datime, width=12,
+                                  background='red', date_pattern="dd/mm/yyyy",
+                                  foreground='white', borderwidth=2)
 
         # Entry "To" date
-        lbl_to = tk.Label(master=frm_options, text='To: ')
-        cal_to = DateEntry(master=frm_options, width=12, background='green', date_pattern="dd/mm/yyyy",
-                           foreground='white', borderwidth=2)
+        lbl_to = tk.Label(master=self.frm_datime, text='To: ')
+        self.cal_to = DateEntry(master=self.frm_datime, width=12,
+                                background='green', date_pattern="dd/mm/yyyy",
+                                foreground='white', borderwidth=2)
 
-        lbl_plane = tk.Label(master=frm_options, text="Plane: ")
+        # CHOOSE PLANE NAME
+        lbl_plane = tk.Label(master=self.frm_options, text="Plane: ")
         option_list_plane = ["T1", "T3", "T4"]
-        self.choice_plane_var = tk.StringVar(master=frm_options)
+        self.choice_plane_var = tk.StringVar(master=self.frm_options)
         self.choice_plane_var.set(option_list_plane[0])
-        opt_plane_name = tk.OptionMenu(frm_options, self.choice_plane_var, *option_list_plane)
+        opt_plane_name = tk.OptionMenu(self.frm_options, self.choice_plane_var, *option_list_plane)
 
-        lbl_var_color = tk.Label(master=frm_options, text="Variable to color: ")
+        # CHOOSE VARIABLE TO SHOW
+        lbl_var_color = tk.Label(master=self.frm_options, text="Variable to color: ")
         option_list_var = ["mean", "sigma", "kurtosis", "skewness"]
-        self.choice_math_val = tk.StringVar(master=frm_options)
+        self.choice_math_val = tk.StringVar(master=self.frm_options)
         self.choice_math_val.set(option_list_var[0])
-        opt_variable_color = tk.OptionMenu(frm_options, self.choice_math_val, *option_list_var)
+        opt_variable_color = tk.OptionMenu(self.frm_options, self.choice_math_val, *option_list_var)
 
-        lbl_cmap = tk.Label(master=frm_options, text="Color map: ")
+        # CHOOSE COLORMAP
+        lbl_cmap = tk.Label(master=self.frm_options, text="Color map: ")
         option_list_cmap = ["jet", "inferno", "plasma", "Pastel2",
                             "copper", "cool", "gist_rainbow",
                             "viridis", "winter", "twilight"]
-        self.choice_cmap = tk.StringVar(master=frm_options)
+        self.choice_cmap = tk.StringVar(master=self.frm_options)
         self.choice_cmap.set(option_list_cmap[0])
-        opt_variable_cmap = tk.OptionMenu(frm_options, self.choice_cmap, *option_list_cmap)
+        opt_variable_cmap = tk.OptionMenu(self.frm_options, self.choice_cmap, *option_list_cmap)
 
         # OK Button!
-        btn_draw = tk.Button(master=frm_options, text="Ok",
-                             command=lambda a=cal_from, b=cal_to: self.refresh_cells(a, b))
+        btn_draw = tk.Button(master=self.frm_options, text="Ok",
+                             command=self.refresh_cells)
 
         # - G R I D -
+        self.frm_datime.grid(row=0, column=0, rowspan=3, columnspan=4)
         lbl_dates.grid(row=0, column=0, columnspan=2)
         lbl_from.grid(row=1, column=0)
-        cal_from.grid(row=1, column=1)
+        self.cal_from.grid(row=1, column=1)
         lbl_to.grid(row=2, column=0)
-        cal_to.grid(row=2, column=1)
+        self.cal_to.grid(row=2, column=1)
 
         lbl_plane.grid(row=3, column=0)
         opt_plane_name.grid(row=4, column=0, rowspan=2)
@@ -126,9 +148,6 @@ class CellsApp:
         opt_variable_cmap.grid(row=4, column=2, rowspan=2)
 
         btn_draw.grid(row=6, column=0, columnspan=3)
-
-        # Wait while self.refresh_cells() method is not executed (pressing "Ok" button)
-        frm_options.wait_variable(self.ok_var)
 
     def draw_colormap_bar(self, min_val, max_val):
         """
@@ -148,6 +167,14 @@ class CellsApp:
             rgb_color = rgba_color[:-1]
             bg_color = to_hex(rgb_color)
             tk.Label(master=self.frm_colormap, bg=bg_color).pack(fill=tk.X, expand=True, side=tk.RIGHT)
+
+    def grid_button(self, master, i, j, bg_color="#000000", fg_color="#ffffff"):
+        button_obj = tk.Button(master=master,
+                               text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
+                               height=2, width=4,
+                               bg=bg_color, fg=fg_color,
+                               command=lambda a=i, b=j: self.cell_button(a, b))
+        return button_obj
 
     def draw_cells(self):
         """
@@ -172,11 +199,14 @@ class CellsApp:
 
                 numpy_value = self.get_math_value(val=self.choice_math_val.get())[i, j]
                 bg_color, fg_color = self.set_button_colors(numpy_value)
-                btn_plot = tk.Button(master=frm_cell,
-                                     text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
-                                     height=2, width=4,
-                                     bg=bg_color, fg=fg_color,
-                                     command=lambda a=i, b=j: self.cell_button(a, b))
+                btn_plot = self.grid_button(frm_cell, i, j, bg_color, fg_color)
+
+                # btn_plot = tk.Button(master=frm_cell,
+                #                      text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
+                #                      height=2, width=4,
+                #                      bg=bg_color, fg=fg_color,
+                #                      command=lambda a=i, b=j: self.cell_button(a, b))
+
                 if j != 5 and i != 4:
                     btn_plot.pack(fill=tk.BOTH, expand=True)
                 elif j == 5 and i != 4:
@@ -212,11 +242,16 @@ class CellsApp:
 
         return bg_color, fg_color
 
-    def refresh_cells(self, cal_from, cal_to):
+    def update_datetime(self):
+        """
+        Needs to be updated!
+        """
+        pass
+
+    def refresh_cells(self):
         self.ok_var.set(1)
 
-        self.from_date = cal_from.get_date()
-        self.to_date = cal_to.get_date()
+        self.update_datetime()
 
         self.plane_name = self.choice_plane_var.get()
 
