@@ -4,11 +4,15 @@
 
 """
 
-# from modules.cells_app import CellsApp
+from os.path import join as join_path
+from modules.gui_root import CellsAppROOT
 from modules.cook_root import CookDataROOT
-from utils.const import DATA_DIR
+from utils.const import ROOT_DATA_DIR, TRUFA_LIB_DIR
+from ROOT import gSystem
 
+trufa_lib_path = join_path(TRUFA_LIB_DIR, "libtunpacker.so")
+gSystem.Load(trufa_lib_path)
 
-if __name__ == "__main__":
-    cook_data = CookDataROOT(data_dir=DATA_DIR)
-    # CellsApp(chef_object=cook_data)
+cook_data = CookDataROOT(data_dir=ROOT_DATA_DIR)
+# ary = cook_data.read_data()
+CellsAppROOT(chef_object=cook_data)

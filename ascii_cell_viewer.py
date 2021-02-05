@@ -1,21 +1,12 @@
 #!/usr/bin/python3
-
 """
 @author: MCruces
 
------------------------------------------
-Sources:
-
-The Real Python
-https://realpython.com/python-gui-tkinter/#working-with-widgets
-
-Command Buttons
-https://stackoverflow.com/questions/10865116/tkinter-creating-buttons-in-for-loop-passing-command-arguments
 """
 
-from modules.cells_app import CellsApp
+from modules.gui_ascii import CellsAppASCII
 from modules.cook_ascii import CookDataASCII
-from utils.const import DATA_DIR
+from utils.const import ASCII_DATA_DIR
 
 # TODO:
 #    - Barra de CMap a la derecha, para entender los colores
@@ -27,5 +18,5 @@ from utils.const import DATA_DIR
 
 
 if __name__ == "__main__":
-    cook_data = CookDataASCII(data_dir=DATA_DIR)
-    CellsApp(chef_object=cook_data)
+    cook_data = CookDataASCII(data_dir=ASCII_DATA_DIR)
+    CellsAppASCII(chef_object=cook_data)

@@ -1,3 +1,16 @@
+"""
+@author: MCruces
+
+-----------------------------------------
+Sources:
+
+The Real Python
+https://realpython.com/python-gui-tkinter/#working-with-widgets
+
+Command Buttons
+https://stackoverflow.com/questions/10865116/tkinter-creating-buttons-in-for-loop-passing-command-arguments
+"""
+
 import numpy as np
 from utils.tkinter_modules import tk, DateEntry
 
@@ -126,6 +139,8 @@ class CellsApp:
         self.frm_colormap.pack(fill=tk.X, expand=True)
 
         step = int((max_val - min_val) / 20)
+        if not step: step = 1
+
         min_val, max_val = int(min_val), int(max_val)
 
         for val in range(min_val, max_val, step):
