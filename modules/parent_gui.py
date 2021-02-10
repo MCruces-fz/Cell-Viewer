@@ -12,16 +12,17 @@ https://stackoverflow.com/questions/10865116/tkinter-creating-buttons-in-for-loo
 """
 
 import numpy as np
-from utils.tkinter_modules import tk, DateEntry
+from utils.tkinter_modules import tk, ttk, DateEntry
 
 from matplotlib import cm
 from matplotlib.colors import Normalize, to_hex
 import matplotlib.pyplot as plt
 from utils.const import *
+from typing import Union
 
 
 class CellsApp:
-    def __init__(self, chef_object: object, window_title=None):
+    def __init__(self, chef_object: object, window_title=None, theme: str = "dark"):
         """
         Constructor of the GUI
 
@@ -35,46 +36,53 @@ class CellsApp:
                 * skewness
                 * kurtosis
         :param window_title: (optional) String with the title of the window
+        :param theme: (optional) dark or light (default dark).
         """
 
         #  --- L A Y O U T ---
         # M A I N   W I N D O W
         self.window = tk.Tk()
         # Configuration:
+        self.theme = theme
+        self.bg_default = None
+        self.fg_default = None
         self.window_config(window_title)
 
         # Object of Input Data
         self.inp_dt = chef_object
 
-        # F R A M E S
-        self.frm_options = tk.Frame(master=self.window)
-        self.frm_datime = tk.Frame(master=self.frm_options)
+        # W I D G E T S
+        # --- Frames:
+        self.frm_options = tk.Frame(master=self.window, bg=self.bg_default)
+        self.frm_datime = tk.Frame(master=self.frm_options, bg=self.bg_default)
+        self.frm_display = None
         self.frm_cells = None
         self.frm_colormap = None
-
-        # D A T A - N E E D E D
-        self.plane_name = "T1"
-        self.mapper = None
+        # --- Labels:
+        # self.lbl_date = None
 
         #     V A R I A B L E
         # D E C L A R A T I O N S
-
+        # datetime objects:
         self.from_date = None
         self.to_date = None
-
+        # Tk Calendars:
         self.cal_from = None
         self.cal_to = None
-
+        # Colormap:
+        self.mapper = None
+        self.choice_cmap = None
+        # Other variables:
+        self.plane_name = "T1"
         self.choice_math_val = None
         self.choice_plane_var = None
-
         self.ok_var = tk.IntVar()
 
-        self.choice_cmap = None
-
+        # L O G I C
+        # Initiates first widget:
         self.choose_options()
-
-        # Wait while self.refresh_cells() method is not executed (pressing "Ok" button)
+        # Wait while self.refresh_cells method is not executed
+        # Continue pressing "Ok" button
         self.frm_options.wait_variable(self.ok_var)
 
         # M A I N - L O O P
@@ -84,55 +92,66 @@ class CellsApp:
         """
         This sets the frame where the buttons to choose options are placed.
         """
-        # FRAME THAT ENCLOSES  E V E R Y T H I N G  E L S E  (all options)
+        # FRAME THAT ENCLOSES   E V E R Y T H I N G   E L S E  (all options)
         self.frm_options.pack(fill=tk.X, expand=True)
 
         # CHOOSE DATE-TIME OPTIONS
         # Label: "Choose dates 'dd/mm/yyyy'"
-        lbl_dates = tk.Label(master=self.frm_datime, text='Date \"dd/mm/yyyy\"')
+        lbl_date = tk.Label(master=self.frm_datime, text='Date dd/mm/yyyy',
+                                 bg=self.bg_default, fg=self.fg_default)
 
         # Entry "From" date
-        lbl_from = tk.Label(master=self.frm_datime, text='From: ')
+        lbl_from = tk.Label(master=self.frm_datime, text='From: ',
+                            bg=self.bg_default, fg=self.fg_default)
         self.cal_from = DateEntry(master=self.frm_datime, width=12,
                                   background='red', date_pattern="dd/mm/yyyy",
-                                  foreground='white', borderwidth=2)
+                                  foreground='white', borderwidth=2,
+                                  style='my.DateEntry')
 
         # Entry "To" date
-        lbl_to = tk.Label(master=self.frm_datime, text='To: ')
+        lbl_to = tk.Label(master=self.frm_datime, text='To: ',
+                          bg=self.bg_default, fg=self.fg_default)
         self.cal_to = DateEntry(master=self.frm_datime, width=12,
                                 background='green', date_pattern="dd/mm/yyyy",
-                                foreground='white', borderwidth=2)
+                                foreground='white', borderwidth=2,
+                                style='my.DateEntry')
 
         # CHOOSE PLANE NAME
-        lbl_plane = tk.Label(master=self.frm_options, text="Plane: ")
+        lbl_plane = tk.Label(master=self.frm_options, text="Plane: ",
+                             bg=self.bg_default, fg=self.fg_default)
         option_list_plane = ["T1", "T3", "T4"]
         self.choice_plane_var = tk.StringVar(master=self.frm_options)
         self.choice_plane_var.set(option_list_plane[0])
         opt_plane_name = tk.OptionMenu(self.frm_options, self.choice_plane_var, *option_list_plane)
+        opt_plane_name.config(bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # CHOOSE VARIABLE TO SHOW
-        lbl_var_color = tk.Label(master=self.frm_options, text="Variable to color: ")
+        lbl_var_color = tk.Label(master=self.frm_options, text="Variable to color: ",
+                                 bg=self.bg_default, fg=self.fg_default)
         option_list_var = ["mean", "sigma", "kurtosis", "skewness"]
         self.choice_math_val = tk.StringVar(master=self.frm_options)
         self.choice_math_val.set(option_list_var[0])
         opt_variable_color = tk.OptionMenu(self.frm_options, self.choice_math_val, *option_list_var)
+        opt_variable_color.config(bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # CHOOSE COLORMAP
-        lbl_cmap = tk.Label(master=self.frm_options, text="Color map: ")
+        lbl_cmap = tk.Label(master=self.frm_options, text="Color map: ",
+                            bg=self.bg_default, fg=self.fg_default)
         option_list_cmap = ["jet", "inferno", "plasma", "Pastel2",
                             "copper", "cool", "gist_rainbow",
                             "viridis", "winter", "twilight"]
         self.choice_cmap = tk.StringVar(master=self.frm_options)
         self.choice_cmap.set(option_list_cmap[0])
         opt_variable_cmap = tk.OptionMenu(self.frm_options, self.choice_cmap, *option_list_cmap)
+        opt_variable_cmap.config(bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # OK Button!
         btn_draw = tk.Button(master=self.frm_options, text="Ok",
-                             command=self.refresh_cells)
+                             command=self.refresh_cells, bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # - G R I D -
         self.frm_datime.grid(row=0, column=0, rowspan=3, columnspan=4)
-        lbl_dates.grid(row=0, column=0, columnspan=2)
+        lbl_date.grid(row=0, column=0, columnspan=2)
         lbl_from.grid(row=1, column=0)
         self.cal_from.grid(row=1, column=1)
         lbl_to.grid(row=2, column=0)
@@ -154,34 +173,41 @@ class CellsApp:
         This sets the frame where the buttons to choose options are placed.
         """
         # FRAME THAT ENCLOSES  E V E R Y T H I N G  E L S E  (all options)
-        self.frm_colormap = tk.Frame(master=self.window)
-        self.frm_colormap.pack(fill=tk.X, expand=True)
+        self.frm_colormap = tk.Frame(master=self.frm_display, bg=self.bg_default, width=500)
+        self.frm_colormap.grid(row=0, column=1, columnspan=3, sticky="news", ipadx=10, padx=5)
 
-        step = int((max_val - min_val) / 20)
-        if not step: step = 1
+        steps_number = 20
+        step_size = (max_val - min_val) / steps_number
 
-        min_val, max_val = int(min_val), int(max_val)
-
-        for val in range(min_val, max_val, step):
+        for step in range(steps_number):
+            val = min_val + step_size * step
             rgba_color = self.mapper.to_rgba(val)
             rgb_color = rgba_color[:-1]
             bg_color = to_hex(rgb_color)
-            tk.Label(master=self.frm_colormap, bg=bg_color).pack(fill=tk.X, expand=True, side=tk.RIGHT)
+            tk.Label(master=self.frm_colormap, bg=bg_color).pack(fill=tk.BOTH, expand=True, side=tk.BOTTOM)
 
-    def grid_button(self, master, i, j, bg_color="#000000", fg_color="#ffffff"):
-        button_obj = tk.Button(master=master,
-                               text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
-                               height=2, width=4,
-                               bg=bg_color, fg=fg_color,
-                               command=lambda a=i, b=j: self.cell_button(a, b))
-        return button_obj
+    def grid_button(self, master, i, j, bg_color="#000000", fg_color="#ffffff") -> tk.Button:
+        """
+        This function has to be written by the developer
+
+        :param master: Parent frame
+        :param i: Index of the row
+        :param j: Index of the column
+        :param bg_color: (optional) background color
+        :param fg_color: (optional) foreground color.
+        :return: tk.Button object
+        """
+        pass
 
     def draw_cells(self):
         """
         This sets the frame where the cell buttons are placed
         """
-        self.frm_cells = tk.Frame(master=self.window)
-        self.frm_cells.pack(fill=tk.BOTH, expand=True)
+        self.frm_display = tk.Frame(master=self.window, bg=self.bg_default)
+        self.frm_display.pack(fill=tk.BOTH, expand=True)
+
+        self.frm_cells = tk.Frame(master=self.frm_display, bg=self.bg_default)
+        self.frm_cells.grid(row=0, column=0, sticky="news")
 
         tk.Grid.rowconfigure(self.frm_cells, index=list(range(NROW)), weight=1, minsize=0)
         tk.Grid.columnconfigure(self.frm_cells, index=list(range(NCOL)), weight=1, minsize=0)
@@ -191,7 +217,8 @@ class CellsApp:
                 frm_cell = tk.Frame(
                     master=self.frm_cells,
                     # relief=tk.RAISED,
-                    borderwidth=0
+                    borderwidth=0,
+                    bg=self.bg_default
                 )
                 frm_cell.grid(row=i, column=j, sticky="news")
 
@@ -199,27 +226,23 @@ class CellsApp:
 
                 numpy_value = self.get_math_value(val=self.choice_math_val.get())[i, j]
                 bg_color, fg_color = self.set_button_colors(numpy_value)
-                btn_plot = self.grid_button(frm_cell, i, j, bg_color, fg_color)
-
-                # btn_plot = tk.Button(master=frm_cell,
-                #                      text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
-                #                      height=2, width=4,
-                #                      bg=bg_color, fg=fg_color,
-                #                      command=lambda a=i, b=j: self.cell_button(a, b))
+                btn_plot = self.grid_button(master=frm_cell,
+                                            i=i, j=j,
+                                            bg_color=bg_color, fg_color=fg_color)
 
                 if j != 5 and i != 4:
                     btn_plot.pack(fill=tk.BOTH, expand=True)
                 elif j == 5 and i != 4:
-                    v_sep = tk.Label(master=frm_cell, text="   ")
+                    v_sep = tk.Label(master=frm_cell, text="   ", bg=self.bg_default, fg=self.fg_default)
                     btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
                     v_sep.pack(fill=tk.BOTH, side=tk.RIGHT)
                 elif i == 4 and j != 5:
-                    h_sep = tk.Label(master=frm_cell)
+                    h_sep = tk.Label(master=frm_cell, bg=self.bg_default, fg=self.fg_default)
                     btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.TOP)
                     h_sep.pack(fill=tk.BOTH, side=tk.BOTTOM)
                 else:  # i == 4 and j == 5
-                    v_sep = tk.Label(master=frm_cell, text="   ")
-                    h_sep = tk.Label(master=frm_cell)
+                    v_sep = tk.Label(master=frm_cell, text="   ", bg=self.bg_default, fg=self.fg_default)
+                    h_sep = tk.Label(master=frm_cell, bg=self.bg_default, fg=self.fg_default)
                     # btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
                     btn_plot.grid(row=0, column=0)
                     v_sep.grid(row=0, column=1)
@@ -244,7 +267,7 @@ class CellsApp:
 
     def update_datetime(self):
         """
-        Needs to be updated!
+        Needs to be edited by the developer!
         """
         pass
 
@@ -265,12 +288,16 @@ class CellsApp:
         norm = Normalize(vmin=min_val, vmax=max_val)
         self.mapper = cm.ScalarMappable(norm=norm, cmap=self.choice_cmap.get())
 
+        # try:
+        #     self.frm_colormap.destroy()
+        # except AttributeError:
+        #     pass
+        # try:
+        #     self.frm_cells.destroy()
+        # except AttributeError:
+        #     pass
         try:
-            self.frm_cells.destroy()
-        except AttributeError:
-            pass
-        try:
-            self.frm_colormap.destroy()
+            self.frm_display.destroy()
         except AttributeError:
             pass
 
@@ -278,25 +305,14 @@ class CellsApp:
         self.draw_colormap_bar(min_val, max_val)
 
     def cell_button(self, row_id, col_id):
+        """
+        Create the function for each button. It must display
+        a matplotlib graph
 
-        all_hits = self.inp_dt.all_data[:, row_id, col_id]
-        mean = self.inp_dt.mean[row_id, col_id]
-        std = self.inp_dt.std[row_id, col_id]
-
-        plt.figure(f"cell ({row_id}, {col_id})")
-        plt.title(f"Plane {self.plane_name} - Cell index ({row_id}, {col_id})")
-
-        plt.hist(all_hits, color='c', edgecolor='k', alpha=0.65)
-        plt.axvline(mean, color='k', linestyle='dashed', linewidth=1, label=f'Mean: {mean:.2f}')
-        min_ylim, max_ylim = plt.ylim()
-        plt.errorbar(x=mean, y=max_ylim * 0.68, xerr=std, color='k', label=f'Std.: {std:.2f}')
-        plt.yscale("log")
-
-        plt.xlabel("Number of hits")
-        plt.ylabel("Counts")
-        plt.legend(loc="best")
-
-        plt.show()
+        :param row_id: Row ID of the cell
+        :param col_id: Column ID of the cell
+        """
+        pass
 
     def get_math_value(self, val: str) -> np.array:
         if self.from_date is None or self.to_date is None:
@@ -313,6 +329,21 @@ class CellsApp:
             raise Exception("Failed val in get_math_value()")
 
     def window_config(self, window_title):
+        if self.theme == "light":
+            self.bg_default = "#ffffff"
+            self.fg_default = "#303030"
+        else:
+            self.bg_default = "#303030"
+            self.fg_default = "#ffffff"
+
+        self.window.configure(bg=self.bg_default)
+
+        style = ttk.Style(self.window)
+        # create custom DateEntry style with red background
+        style.configure('my.DateEntry',
+                        fieldbackground=self.bg_default, fieldforeground=self.fg_default,
+                        background=self.bg_default, foreground=self.fg_default)
+
         if window_title is None:
             self.window.title("Cell Viewer")
         else:

@@ -15,4 +15,9 @@ gSystem.Load(trufa_lib_path)
 
 cook_data = CookDataROOT(data_dir=ROOT_DATA_DIR)
 # ary = cook_data.read_data()
-CellsAppROOT(chef_object=cook_data)
+CellsAppROOT(chef_object=cook_data, theme="dark")
+
+# TODO:
+#  Extraer todos los archivos ascii y guardarlos en:
+#  Datos4TB/tragaldabas/data/monitoring/cellmaps
+#  con nombres más cortitos y útiles

@@ -55,6 +55,7 @@ class CookDataROOT(Chef):
 
         # FIXME : choose adecuate dtype
         self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
+        self.total_diff_time = None
 
     def read_data(self):
         """
@@ -67,19 +68,8 @@ class CookDataROOT(Chef):
         gROOT.SetBatch(kTRUE)
         EnableImplicitMT()
 
-        # Take range of dates
-        # find files and get its full paths
-        # use get_hits_array() method to get arrays and append them into one greater array
-
-        # TODO: implementar una función para escoger las dfechas y otra para escoger las horas
-        #  Como argumento obligatorio deben tener el frame en el que se debe acomodar
-
-        # Delete when finished
-        # self.from_date = datetime.datetime(year=2020, month=4, day=3, hour=12, minute=30)
-        # self.to_date = datetime.datetime(year=2020, month=4, day=3, hour=15, minute=23)
-
-        file_from = self.from_date.strftime("%y%j%H%M")
-        file_to = self.to_date.strftime("%y%j%H%M")
+        file_from = self.from_date.strftime("%y%j%H%M%S")
+        file_to = self.to_date.strftime("%y%j%H%M%S")
 
         tstamp_from = int(file_from)
         tstamp_to = int(file_to)
@@ -99,9 +89,6 @@ class CookDataROOT(Chef):
         return self.all_data
 
     def get_hits_array(self, full_path):
-        # Delete when finished
-        self.plane_name = "T1"
-
         # Create TFile
         file0 = TFile(full_path, "READ")
 
@@ -125,14 +112,11 @@ class CookDataROOT(Chef):
         row_arr = np.concatenate(row_branch)
 
         coord_hits = np.vstack((row_arr, col_arr)).T
-        # print(coord_hits.shape)
 
         # FIXME: Find more efficient way!!
         for coords in coord_hits:
             row, col = coords
             self.all_data[row - 1, col - 1] += 1
-
-        # print(self.all_data)
 
     def update(self, from_date=None, to_date=None,
                plane_name: str = "T1"):
@@ -140,5 +124,5 @@ class CookDataROOT(Chef):
 
         # FIXME: It won't work if there is missing data in range (mean will be wrong)
         #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
-        time_diff = self.to_date - self.from_date
-        self.mean = self.all_data / time_diff.total_seconds()
+        self.total_diff_time = self.to_date - self.from_date
+        self.mean = self.all_data / self.total_diff_time.total_seconds()
