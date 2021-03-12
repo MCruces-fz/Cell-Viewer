@@ -56,7 +56,6 @@ class CookDataROOT(Chef):
 
         gSystem.Load(join_path(TRUFA_LIB_DIR, "libtunpacker.so"))
 
-        # FIXME : choose adecuate dtype
         self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
         self.total_diff_time = None
 
@@ -87,16 +86,42 @@ class CookDataROOT(Chef):
             if not filename.endswith('.root'): continue
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
-                self.get_hits_array(join_path(self.main_data_dir, filename))
+                if self.current_var == "saetas":
+                    pass
+                elif self.current_var in ["hits", "Hz"]:
+                    self.get_raw_hits_array(join_path(self.main_data_dir, filename))
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
         print("100%\tdone")
 
         return self.all_data
 
-    def get_hits_array(self, full_path):
-        # Create TFile
-        file0 = TFile(full_path, "READ")
+    def get_rpc_saeta_array(self, full_path:str):
+        """
+        Set all hits used in reconstruction in chosen detector plane to all_data
+        attribute of this class.
+
+        :param full_path: full path to the root file.
+        """
+
+        # TODO: Leer la rama RpcSaeta3Planes y para cada saeta de cada evento tomar las coordenadas
+        #  de los hits usados para reconstruir dicha saeta.
+
         # Read TTree
+        tree = TFile(full_path, "READ").Get("T")
+
+        nevents = tree.GetEntries()
+
+        for evt in range(nevents):
+            pass
+
+    def get_raw_hits_array(self, full_path: str):
+        """
+        Set all hits in chosen detector plane to all_data attribute of this class.
+
+        :param full_path: full path to the root file.
+        """
+        # Read TTree
+        file0 = TFile(full_path, "READ")
         tree = file0.Get("T")
         # nentries = tree.GetEntries()
 
@@ -108,7 +133,7 @@ class CookDataROOT(Chef):
                                     branches="rpcraw.fRow",
                                     selection=f"rpcraw.fTrbnum == {trbnum}")
 
-        self.all_data, _, _ = np.histogram2d(
+        hits, _, _ = np.histogram2d(
             np.concatenate(row_branch),
             np.concatenate(col_branch),
             bins=[
@@ -116,6 +141,8 @@ class CookDataROOT(Chef):
                 np.arange(0.5, NCOL + 1)
             ]
         )
+
+        self.all_data += hits.astype(np.uint32)
 
     def update(self, from_date=None, to_date=None,
                plane_name: str = "T1", var_to_update: str = None):
@@ -128,17 +155,17 @@ class CookDataROOT(Chef):
             self.to_date = to_date
             self.plane_name = plane_name
 
-            if var_to_update != self.current_var:
-                if var_to_update == "hits":
-                    self.all_data = self.read_data()
-                elif var_to_update == "Hz":
-                    self.all_data = self.read_data()
+            # if var_to_update != self.current_var:
+            if var_to_update == "hits":
+                self.all_data = self.read_data()
+            elif var_to_update == "Hz":
+                self.all_data = self.read_data()
 
-                    # FIXME: It won't work if there is missing data in range (mean will be wrong)
-                    #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
-                    self.total_diff_time = self.to_date - self.from_date
-                    self.mean = self.all_data / self.total_diff_time.total_seconds()
-                elif var_to_update == "saetas":
-                    pass
+                # FIXME: It won't work if there is missing data in range (mean will be wrong)
+                #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
+                self.total_diff_time = self.to_date - self.from_date
+                self.mean = self.all_data / self.total_diff_time.total_seconds()
+            elif var_to_update == "saetas":
+                pass
 
             self.current_var = var_to_update
