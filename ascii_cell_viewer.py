@@ -4,8 +4,8 @@
 
 """
 
-from modules.gui_ascii import CellsAppASCII
-from modules.cook_ascii import CookDataASCII
+from interface.gui_ascii import CellsAppASCII
+from kitchen.cook_ascii import CookDataASCII
 from utils.const import ASCII_DATA_DIR
 
 # TODO:

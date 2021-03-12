@@ -8,7 +8,7 @@ import os
 from os.path import join as join_path
 from scipy.stats import kurtosis, skew
 
-from modules.chef import Chef
+from kitchen.chef import Chef
 from utils.const import *
 
 

@@ -5,8 +5,8 @@
 """
 
 from os.path import join as join_path
-from modules.gui_root import CellsAppROOT
-from modules.cook_root import CookDataROOT
+from interface.gui_root import CellsAppROOT
+from kitchen.cook_root import CookDataROOT
 from utils.const import ROOT_DATA_DIR, TRUFA_LIB_DIR
 from ROOT import gSystem
 

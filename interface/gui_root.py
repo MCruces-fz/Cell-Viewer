@@ -1,5 +1,4 @@
-from modules.parent_gui import CellsApp
-import matplotlib.pyplot as plt
+from interface.parent_gui import CellsApp
 from utils.tkinter_modules import *
 import datetime
 
