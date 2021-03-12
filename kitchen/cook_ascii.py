@@ -7,6 +7,7 @@ import numpy as np
 import os
 from os.path import join as join_path
 from scipy.stats import kurtosis, skew
+from typing import List
 
 from kitchen.chef import Chef
 from utils.const import *
@@ -20,6 +21,8 @@ class CookDataASCII(Chef):
         :param data_dir: Parent directory where ASCII files are stored.
         """
         super().__init__(data_dir)
+
+        self._option_list_var: List[str] = ["mean", "sigma", "kurtosis", "skewness"]
 
     def get_hits_array(self, full_path):
         """
@@ -66,8 +69,10 @@ class CookDataASCII(Chef):
         return np.asarray(arys)
 
     def update(self, from_date=None, to_date=None,
-               plane_name: str = "T1"):
+               plane_name: str = "T1", var_to_update: str = None):
         super().update(from_date, to_date, plane_name)
+
+        self.all_data = self.read_data()
 
         self.mean = self.all_data.mean(axis=0)
         self.std = self.all_data.std(axis=0)

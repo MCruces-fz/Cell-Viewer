@@ -2,6 +2,8 @@ from interface.parent_gui import CellsApp
 import matplotlib.pyplot as plt
 from utils.tkinter_modules import tk
 
+import numpy as np
+
 
 class CellsAppASCII(CellsApp):
     def update_datetime(self):
@@ -9,6 +11,16 @@ class CellsAppASCII(CellsApp):
         self.to_date = self.cal_from.get_date()
 
     def grid_button(self, master, i, j, bg_color="#000000", fg_color="#ffffff"):
+        """
+        Tkinter Button object, prepared for stack on the grid.
+
+        :param master: Parent frame
+        :param i: Index of the row
+        :param j: Index of the column
+        :param bg_color: (optional) background color
+        :param fg_color: (optional) foreground color.
+        :return: tk.Button object
+        """
         button_obj = tk.Button(master=master,
                                text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
                                height=2, width=4,
@@ -17,6 +29,14 @@ class CellsAppASCII(CellsApp):
         return button_obj
 
     def cell_button(self, row_id, col_id):
+        """
+        Create the function for each button. It displays
+        a matplotlib graph
+
+        :param row_id: Row ID of the cell
+        :param col_id: Column ID of the cell
+        """
+
         all_hits = self.inp_dt.all_data[:, row_id, col_id]
         mean = self.inp_dt.mean[row_id, col_id]
         std = self.inp_dt.std[row_id, col_id]
@@ -35,3 +55,23 @@ class CellsAppASCII(CellsApp):
         plt.legend(loc="best")
 
         plt.show()
+
+    def get_math_value(self, val: str) -> np.array:
+        """
+        Function which returns the array corresponding to the given string.
+
+        :param val: String with the name of the desired array (mean, sigma, skewness, kurtosis).
+        :return: Array with the shape of the detector plane.
+        """
+        if self.from_date is None or self.to_date is None:
+            return 0
+        if val == "mean":
+            return self.inp_dt.mean
+        elif val == "sigma":
+            return self.inp_dt.std
+        elif val == "skewness":
+            return self.inp_dt.skewness
+        elif val == "kurtosis":
+            return self.inp_dt.kurtosis
+        else:
+            raise Exception("Failed val in get_math_value()")

@@ -42,6 +42,8 @@ import root_numpy as rnp
 from ROOT import gROOT, gSystem, TFile, kTRUE, TCanvas, RDataFrame, gStyle
 from ROOT import EnableImplicitMT  # Multi Thread
 
+from typing import List
+
 
 class CookDataROOT(Chef):
     def __init__(self, data_dir: str = ROOT_DATA_DIR):
@@ -58,14 +60,17 @@ class CookDataROOT(Chef):
         self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
         self.total_diff_time = None
 
-    def read_data(self):
+        self._option_list_var: List[str] = ["hits", "Hz", "saetas"]
+        self.current_var: str = self._option_list_var[0]
+
+    def read_data(self) -> np.array:
         """
         Redefinition of Chef.read_data() method to read data from
         ROOT files.
 
         :return: Numpy array with all data.
         """
-        # ??
+        # What the hack is this?
         gROOT.SetBatch(kTRUE)
         EnableImplicitMT()
 
@@ -82,7 +87,6 @@ class CookDataROOT(Chef):
             if not filename.endswith('.root'): continue
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
-                # Input Filename
                 self.get_hits_array(join_path(self.main_data_dir, filename))
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
         print("100%\tdone")
@@ -92,16 +96,11 @@ class CookDataROOT(Chef):
     def get_hits_array(self, full_path):
         # Create TFile
         file0 = TFile(full_path, "READ")
-
         # Read TTree
         tree = file0.Get("T")
-
-        nentries = tree.GetEntries()
-        # print(f"Number of entries: {nentries}")
+        # nentries = tree.GetEntries()
 
         trbnum = TRB_TAB[self.plane_name]
-        # print(trbnum)
-
         col_branch = rnp.tree2array(tree=tree,
                                     branches="rpcraw.fCol",
                                     selection=f"rpcraw.fTrbnum == {trbnum}")
@@ -119,10 +118,27 @@ class CookDataROOT(Chef):
         )
 
     def update(self, from_date=None, to_date=None,
-               plane_name: str = "T1"):
-        super().update(from_date, to_date, plane_name)
+               plane_name: str = "T1", var_to_update: str = None):
+        # super().update(from_date, to_date, plane_name)
 
-        # FIXME: It won't work if there is missing data in range (mean will be wrong)
-        #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
-        self.total_diff_time = self.to_date - self.from_date
-        self.mean = self.all_data / self.total_diff_time.total_seconds()
+        # Update all data only if necessary
+        if from_date != self.from_date or to_date != self.to_date or \
+                plane_name != self.plane_name or var_to_update != self.current_var:
+            self.from_date = from_date
+            self.to_date = to_date
+            self.plane_name = plane_name
+
+            if var_to_update != self.current_var:
+                if var_to_update == "hits":
+                    self.all_data = self.read_data()
+                elif var_to_update == "Hz":
+                    self.all_data = self.read_data()
+
+                    # FIXME: It won't work if there is missing data in range (mean will be wrong)
+                    #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
+                    self.total_diff_time = self.to_date - self.from_date
+                    self.mean = self.all_data / self.total_diff_time.total_seconds()
+                elif var_to_update == "saetas":
+                    pass
+
+            self.current_var = var_to_update

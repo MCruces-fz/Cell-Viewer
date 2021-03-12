@@ -1,17 +1,29 @@
 from interface.parent_gui import CellsApp
+from kitchen.cook_root import CookDataROOT
 from utils.tkinter_modules import *
+
+import numpy as np
 import datetime
 
 
 class CellsAppROOT(CellsApp):
-    def __init__(self, chef_object: object, window_title=None, theme: str = "dark"):
+    def __init__(self, chef_object: CookDataROOT, window_title=None, theme: str = "dark"):
         super().__init__(chef_object, window_title, theme)
         self.var_hour_from = None
         self.var_mins_from = None
         self.var_hour_to = None
         self.var_mins_to = None
 
-    def set_spinbox(self, master, var, f=0, t=1):
+    def set_spinbox(self, master: object, var: object, f: int = 0, t: int = 1):
+        """
+        Custom Spinbox for set time HH:MM.
+
+        :param master: Parent frame
+        :param var: Variable to set the chosen value
+        :param f: value to start from (default 0)
+        :param t: value to end spinbox (default 1)
+        :return: Spinbox object
+        """
         spx = tk.Spinbox(master, from_=f, to=t, width=2,
                          wrap=True, textvariable=var,
                          bg=self.bg_default, fg=self.fg_default,
@@ -19,6 +31,12 @@ class CellsAppROOT(CellsApp):
         return spx
 
     def choose_options(self):
+        """
+        L A Y O U T
+
+        This updated the frame where the buttons to choose options are placed.
+        """
+
         super().choose_options()
         lbl_time = tk.Label(master=self.frm_datime, text='HH:MM (24h)',
                             bg=self.bg_default, fg=self.fg_default)
@@ -39,13 +57,24 @@ class CellsAppROOT(CellsApp):
         spx_hour_to.grid(row=2, column=2)
         spx_mins_to.grid(row=2, column=3)
 
-    def grid_button(self, master, i, j, bg_color="#000000", fg_color="#ffffff"):
-        # super().grid_button(master, i, j, )
+    def grid_button(self, master: object, i: int, j: int, bg_color: str = "#000000", fg_color: str = "#ffffff"):
+        """
+        Tkinter Button object, prepared for stack on the grid.
+
+        :param master: Parent frame
+        :param i: Index of the row
+        :param j: Index of the column
+        :param bg_color: (optional) background color
+        :param fg_color: (optional) foreground color.
+        :return: tk.Button object
+        """
         value_name = self.choice_math_val.get()
-        if value_name == "mean":
+        if value_name == "Hz":
             txt = f"{self.get_math_value(val=value_name)[i, j]:.1f} Hz"
-        else:
+        elif value_name in ["saetas", "hits"]:
             txt = f"{self.get_math_value(val=value_name)[i, j]:.0f}"
+        else:
+            raise Exception("Problem in grid_button method with chosen variable name.")
 
         button_obj = tk.Button(master=master,
                                text=txt,
@@ -54,10 +83,37 @@ class CellsAppROOT(CellsApp):
                                command=lambda a=i, b=j: self.cell_button(a, b), bd=0)
         return button_obj
 
-    def cell_button(self, row_id, col_id):
+    def cell_button(self, row_id: int, col_id: int):
+        """
+        Create the function for each button. Only passed to override parent method.
+
+        :param row_id: Row ID of the cell
+        :param col_id: Column ID of the cell
+        """
         pass
 
+    def get_math_value(self, val: str) -> np.array:
+        """
+        Function which returns the array corresponding to the given string.
+
+        :param val: String with the name of the desired array (hits, Hz, saetas).
+        :return: Array with the shape of the detector plane.
+        """
+        if self.from_date is None or self.to_date is None:
+            return 0
+        if val == "hits":
+            return self.inp_dt.all_data
+        elif val == "Hz":
+            return self.inp_dt.mean
+        elif val == "saetas":
+            return np.zeros(self.inp_dt.all_data.shape)
+        else:
+            raise Exception("Failed val in get_math_value()")
+
     def update_datetime(self):
+        """
+        Update the date and time global variables
+        """
         self.from_date = datetime.datetime.combine(
             self.cal_from.get_date(),
             datetime.time(hour=self.var_hour_from.get(), minute=self.var_mins_from.get())

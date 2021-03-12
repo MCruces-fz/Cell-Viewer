@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+from typing import List
 
 
 class Chef:
@@ -24,12 +25,19 @@ class Chef:
         self.plane_name = None
 
         self.all_data = None
+
+        self._option_list_var: List[str] = []
+
         self.mean = None
         self.std = None
         self.skewness = None  # skew = 0 -> 100% symmetric
         self.kurtosis = None
 
-    def read_data(self):
+    @property
+    def option_list_var(self):
+        return self._option_list_var
+
+    def read_data(self) -> np.array:
         """
         EDIT IS NEEDED:
 
@@ -38,16 +46,18 @@ class Chef:
 
         :return: 3D Numpy array with all data.
         """
-        return np.array([])
+
+        raise Exception("Method read_data must be override")
 
     def update(self, from_date=None, to_date=None,
-               plane_name: str = "T1"):
+               plane_name: str = "T1", var_to_update: str = None):
         """
         Method to update all the self variables needed for the GUI.
 
         :param from_date: Starting date in datetime format.
         :param to_date: Ending date in datetime format.
         :param plane_name: Name of the plane to get values.
+        :param var_to_update:
         :return: Void function, It only updates self variables.
         """
 
@@ -59,8 +69,6 @@ class Chef:
             self.to_date = to_date
 
             self.plane_name = plane_name
-
-            self.all_data = self.read_data()
 
             # self.mean     =  MEAN
             # self.std      =  STD
