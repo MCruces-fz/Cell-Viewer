@@ -4,14 +4,9 @@
 
 """
 
-from os.path import join as join_path
 from interface.gui_root import CellsAppROOT
 from kitchen.cook_root import CookDataROOT
-from utils.const import ROOT_DATA_DIR, TRUFA_LIB_DIR
-from ROOT import gSystem
-
-trufa_lib_path = join_path(TRUFA_LIB_DIR, "libtunpacker.so")
-gSystem.Load(trufa_lib_path)
+from utils.const import ROOT_DATA_DIR
 
 cook_data = CookDataROOT(data_dir=ROOT_DATA_DIR)
 # ary = cook_data.read_data()

@@ -38,7 +38,6 @@ import os
 from os.path import join as join_path
 from utils.const import *
 from kitchen.chef import Chef
-import ROOT
 import root_numpy as rnp
 from ROOT import gROOT, gSystem, TFile, kTRUE, TCanvas, RDataFrame, gStyle
 from ROOT import EnableImplicitMT  # Multi Thread
@@ -52,6 +51,8 @@ class CookDataROOT(Chef):
         :param data_dir: Parent directory where ROOT files are stored.
         """
         super().__init__(data_dir)
+
+        gSystem.Load(join_path(TRUFA_LIB_DIR, "libtunpacker.so"))
 
         # FIXME : choose adecuate dtype
         self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
@@ -78,11 +79,11 @@ class CookDataROOT(Chef):
         self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
 
         for filename in sorted(os.listdir(ROOT_DATA_DIR)):
+            if not filename.endswith('.root'): continue
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
                 # Input Filename
-                input_full_path = join_path(self.main_data_dir, filename)
-                self.get_hits_array(input_full_path)
+                self.get_hits_array(join_path(self.main_data_dir, filename))
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
         print("100%\tdone")
 
@@ -108,15 +109,14 @@ class CookDataROOT(Chef):
                                     branches="rpcraw.fRow",
                                     selection=f"rpcraw.fTrbnum == {trbnum}")
 
-        col_arr = np.concatenate(col_branch)
-        row_arr = np.concatenate(row_branch)
-
-        coord_hits = np.vstack((row_arr, col_arr)).T
-
-        # FIXME: Find more efficient way!!
-        for coords in coord_hits:
-            row, col = coords
-            self.all_data[row - 1, col - 1] += 1
+        self.all_data, _, _ = np.histogram2d(
+            np.concatenate(row_branch),
+            np.concatenate(col_branch),
+            bins=[
+                np.arange(0.5, NROW + 1),
+                np.arange(0.5, NCOL + 1)
+            ]
+        )
 
     def update(self, from_date=None, to_date=None,
                plane_name: str = "T1"):
