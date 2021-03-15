@@ -8,6 +8,7 @@ __pycache__/
 
 # My GitIgnores
 .idea/
+s*.vim
 
 # Distribution / packaging
 .Python
