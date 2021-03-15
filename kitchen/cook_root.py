@@ -36,7 +36,7 @@ import datetime
 import numpy as np
 import os
 from os.path import join as join_path
-from utils.const import *
+from utils.const import NROW, NCOL, TRB_TAB, ROOT_DATA_DIR, TRUFA_LIB_DIR
 from kitchen.chef import Chef
 import root_numpy as rnp
 from ROOT import gROOT, gSystem, TFile, kTRUE, TCanvas, RDataFrame, gStyle

@@ -1,6 +1,6 @@
 from interface.parent_gui import CellsApp
 from kitchen.cook_root import CookDataROOT
-from utils.tkinter_modules import *
+from utils.tkinter_modules import tk
 
 import numpy as np
 import datetime
