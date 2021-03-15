@@ -28,11 +28,6 @@ class Chef:
 
         self._option_list_var: List[str] = []
 
-        self.mean = None
-        self.std = None
-        self.skewness = None  # skew = 0 -> 100% symmetric
-        self.kurtosis = None
-
     @property
     def option_list_var(self):
         return self._option_list_var

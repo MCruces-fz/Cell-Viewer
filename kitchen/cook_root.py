@@ -56,11 +56,15 @@ class CookDataROOT(Chef):
 
         gSystem.Load(join_path(TRUFA_LIB_DIR, "libtunpacker.so"))
 
-        self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
         self.total_diff_time = None
 
         self._option_list_var: List[str] = ["hits", "Hz", "saetas"]
         self.current_var: str = self._option_list_var[0]
+
+        self.all_data = None # np.zeros((NROW, NCOL), dtype=np.uint32)
+        self.saetas = None
+        self.mean = None
+        # TODO: If mean is not none -> Calculate data, else pass cached data. (the same for saetas)
 
     def read_data(self) -> np.array:
         """
@@ -80,21 +84,21 @@ class CookDataROOT(Chef):
         tstamp_to = int(file_to)
 
         # Clear Data
-        self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
+        if self.current_var == "saetas":
+            self.saetas = np.zeros((NROW, NCOL), dtype=np.uint32)
+        elif self.current_var in ["hits", "Hz"]:
+            self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
 
         for filename in sorted(os.listdir(ROOT_DATA_DIR)):
             if not filename.endswith('.root'): continue
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
                 if self.current_var == "saetas":
-                    pass
-                    # self.all_data = np.zeros((NCOL, NROW))
+                    self.get_rpc_saeta_array(join_path(self.main_data_dir, filename))
                 elif self.current_var in ["hits", "Hz"]:
                     self.get_raw_hits_array(join_path(self.main_data_dir, filename))
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
         print("100%\tdone")
-
-        return self.all_data
 
     def get_rpc_saeta_array(self, full_path:str):
         """
@@ -104,22 +108,16 @@ class CookDataROOT(Chef):
         :param full_path: full path to the root file.
         """
 
-        # TODO: Leer la rama RpcSaeta3Planes y para cada saeta de cada evento tomar las coordenadas
-        #  de los hits usados para reconstruir dicha saeta.
-
         # Read TTree
         file0 = TFile(full_path, "READ")
         tree = file0.Get("T")
 
         nevents = tree.GetEntries()
 
-        debug = True
-
-        if debug:
-            plane_name = "T1"
-            self.plane_name = plane_name
+        debug = False
 
         trbnum = TRB_TAB[self.plane_name]
+        # reco_cells = np.zeros((NCOL, NROW))
 
         for evt in range(nevents):
             tree.GetEntry(evt)
@@ -160,14 +158,17 @@ class CookDataROOT(Chef):
                 saetas_per_index[k_ind] += 1
 
             if debug:
+                print("")
                 print(f"Hit indices in plane {self.plane_name}: {k_indices}")
                 print(f"Saetas per index: {saetas_per_index}")
-                print("")
+                print("\n")
 
-            # col_leaf = []
-            # row_leaf = []
-            # for col, row in list(zip(col_leaf, row_leaf)):
-            #     pass
+            for hit in range(nhits):
+                if hit in saetas_per_index:
+                    hit = int(hit)
+                    col = int(col_leaf.GetValue(hit))
+                    row = int(row_leaf.GetValue(hit))
+                    self.saetas[row - 1, col - 1] += saetas_per_index[hit]
 
     def get_raw_hits_array(self, full_path: str):
         """
@@ -211,18 +212,20 @@ class CookDataROOT(Chef):
             self.to_date = to_date
             self.plane_name = plane_name
 
-            # if var_to_update != self.current_var:
+            # TODO: Check if values are in memory already
             if var_to_update == "hits":
-                self.all_data = self.read_data()
+                self.current_var = var_to_update
+                self.read_data()
             elif var_to_update == "Hz":
                 # FIXME: Fails when loading before saetas.
-                self.all_data = self.read_data()
+                self.current_var = var_to_update
+                self.read_data()
 
                 # FIXME: It won't work if there is missing data in range (mean will be wrong)
                 #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
                 self.total_diff_time = self.to_date - self.from_date
                 self.mean = self.all_data / self.total_diff_time.total_seconds()
             elif var_to_update == "saetas":
-                pass
+                self.current_var = var_to_update
+                self.read_data()
 
-            self.current_var = var_to_update

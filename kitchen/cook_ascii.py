@@ -24,6 +24,11 @@ class CookDataASCII(Chef):
 
         self._option_list_var: List[str] = ["mean", "sigma", "kurtosis", "skewness"]
 
+        self.mean = None
+        self.std = None
+        self.skewness = None  # skew = 0 -> 100% symmetric
+        self.kurtosis = None
+
     def get_hits_array(self, full_path):
         """
         Get array from ASCII file with hits un tables for the plane

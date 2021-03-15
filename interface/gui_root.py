@@ -106,7 +106,7 @@ class CellsAppROOT(CellsApp):
         elif val == "Hz":
             return self.inp_dt.mean
         elif val == "saetas":
-            return np.zeros(self.inp_dt.all_data.shape)
+            return self.inp_dt.saetas
         else:
             raise Exception("Failed val in get_math_value()")
 
