@@ -88,6 +88,7 @@ class CookDataROOT(Chef):
             if tstamp_from <= tstamp_file <= tstamp_to:
                 if self.current_var == "saetas":
                     pass
+                    # self.all_data = np.zeros((NCOL, NROW))
                 elif self.current_var in ["hits", "Hz"]:
                     self.get_raw_hits_array(join_path(self.main_data_dir, filename))
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
@@ -107,12 +108,66 @@ class CookDataROOT(Chef):
         #  de los hits usados para reconstruir dicha saeta.
 
         # Read TTree
-        tree = TFile(full_path, "READ").Get("T")
+        file0 = TFile(full_path, "READ")
+        tree = file0.Get("T")
 
         nevents = tree.GetEntries()
 
+        debug = True
+
+        if debug:
+            plane_name = "T1"
+            self.plane_name = plane_name
+
+        trbnum = TRB_TAB[self.plane_name]
+
         for evt in range(nevents):
-            pass
+            tree.GetEntry(evt)
+
+            ind_leaf = tree.GetLeaf(f"RpcSaeta3Planes.find{trbnum}")
+
+            nsaetas = ind_leaf.GetLen()
+            if not nsaetas: continue
+
+            if debug:
+                print(f"{nsaetas}\t#Saetas")
+
+            col_leaf = tree.GetLeaf("rpchit.fCol")
+            row_leaf = tree.GetLeaf("rpchit.fRow")
+            nhits = col_leaf.GetLen()
+
+            if debug:
+                trb_leaf = tree.GetLeaf("rpchit.fTrbnum")
+                print(f"{nhits}\t#Hits")
+
+                trb_nhits = 0
+                for hit in range(trb_leaf.GetLen()):
+                    plane = trb_leaf.GetValue(hit)
+                    if plane == trbnum:
+                        trb_nhits += 1
+                print(f"{trb_nhits}\t#Hits in plane {self.plane_name}")
+
+
+            k_indices = []
+            saetas_per_index = {}
+            for entry in range(nsaetas):
+                k_ind = int(ind_leaf.GetValue(entry))
+                if debug:
+                    if not k_ind in k_indices:
+                        k_indices.append(k_ind)
+                if not k_ind in saetas_per_index:
+                    saetas_per_index[k_ind] = 0
+                saetas_per_index[k_ind] += 1
+
+            if debug:
+                print(f"Hit indices in plane {self.plane_name}: {k_indices}")
+                print(f"Saetas per index: {saetas_per_index}")
+                print("")
+
+            # col_leaf = []
+            # row_leaf = []
+            # for col, row in list(zip(col_leaf, row_leaf)):
+            #     pass
 
     def get_raw_hits_array(self, full_path: str):
         """
@@ -126,6 +181,7 @@ class CookDataROOT(Chef):
         # nentries = tree.GetEntries()
 
         trbnum = TRB_TAB[self.plane_name]
+        # print(f"{self.plane_name}, trbnum = {trbnum}")
         col_branch = rnp.tree2array(tree=tree,
                                     branches="rpcraw.fCol",
                                     selection=f"rpcraw.fTrbnum == {trbnum}")
@@ -159,6 +215,7 @@ class CookDataROOT(Chef):
             if var_to_update == "hits":
                 self.all_data = self.read_data()
             elif var_to_update == "Hz":
+                # FIXME: Fails when loading before saetas.
                 self.all_data = self.read_data()
 
                 # FIXME: It won't work if there is missing data in range (mean will be wrong)
