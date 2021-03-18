@@ -10,6 +10,8 @@ __pycache__/
 .idea/
 s*.vim
 *_debug.py
+store/*
+!store/CellViewer-Reco-T1.png
 
 # Distribution / packaging
 .Python
