@@ -16,7 +16,7 @@ from utils.tkinter_modules import tk, ttk, DateEntry
 
 from matplotlib import cm
 from matplotlib.colors import Normalize, to_hex
-from utils.const import *
+from utils.const import NROW, NCOL
 
 from kitchen.chef import Chef
 
@@ -207,50 +207,52 @@ class CellsApp:
         """
         This sets the frame where the cell buttons are placed
         """
+        # packed cells and colormap
         self.frm_display = tk.Frame(master=self.window, bg=self.bg_default)
         self.frm_display.pack(fill=tk.BOTH, expand=True)
 
+        # packed cells
         self.frm_cells = tk.Frame(master=self.frm_display, bg=self.bg_default)
         self.frm_cells.grid(row=0, column=0, sticky="news")
+
+        frm_trb_nw= tk.Frame(master=self.frm_cells, bg=self.bg_default)
+        frm_trb_nw.grid(row=1, column=1, sticky="news", padx=5, pady=5)
+        frm_trb_ne= tk.Frame(master=self.frm_cells, bg=self.bg_default)
+        frm_trb_ne.grid(row=1, column=2, sticky="news", padx=5, pady=5)
+        frm_trb_sw= tk.Frame(master=self.frm_cells, bg=self.bg_default)
+        frm_trb_sw.grid(row=2, column=1, sticky="news", padx=5, pady=5)
+        frm_trb_se= tk.Frame(master=self.frm_cells, bg=self.bg_default)
+        frm_trb_se.grid(row=2, column=2, sticky="news", padx=5, pady=5)
 
         tk.Grid.rowconfigure(self.frm_cells, index=list(range(NROW)), weight=1, minsize=0)
         tk.Grid.columnconfigure(self.frm_cells, index=list(range(NCOL)), weight=1, minsize=0)
 
         for i in range(NROW):
             for j in range(NCOL):
+                # Select TRB
+                if i < NROW / 2 and j < NCOL / 2:
+                    frame = frm_trb_nw
+                elif i >= NROW / 2 and j < NCOL / 2:
+                    frame = frm_trb_sw
+                elif i >= NROW / 2 and j >= NCOL / 2:
+                    frame = frm_trb_se
+                elif i < NROW / 2 and j >= NCOL / 2:
+                    frame = frm_trb_ne
+
                 frm_cell = tk.Frame(
-                    master=self.frm_cells,
+                    master=frame,
                     # relief=tk.RAISED,
                     borderwidth=0,
                     bg=self.bg_default
                 )
                 frm_cell.grid(row=i, column=j, sticky="news")
 
-                # mean, std = self.get_mean(i, j), self.get_std(i, j)
-
                 numpy_value = self.get_math_value(val=self.choice_math_val.get())[i, j]
                 bg_color, fg_color = self.set_button_colors(numpy_value)
                 btn_plot = self.grid_button(master=frm_cell,
                                             i=i, j=j,
                                             bg_color=bg_color, fg_color=fg_color)
-
-                if j != 5 and i != 4:
-                    btn_plot.pack(fill=tk.BOTH, expand=True)
-                elif j == 5 and i != 4:
-                    v_sep = tk.Label(master=frm_cell, text="   ", bg=self.bg_default, fg=self.fg_default)
-                    btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
-                    v_sep.pack(fill=tk.BOTH, side=tk.RIGHT)
-                elif i == 4 and j != 5:
-                    h_sep = tk.Label(master=frm_cell, bg=self.bg_default, fg=self.fg_default)
-                    btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.TOP)
-                    h_sep.pack(fill=tk.BOTH, side=tk.BOTTOM)
-                else:  # i == 4 and j == 5
-                    v_sep = tk.Label(master=frm_cell, text="   ", bg=self.bg_default, fg=self.fg_default)
-                    h_sep = tk.Label(master=frm_cell, bg=self.bg_default, fg=self.fg_default)
-                    # btn_plot.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
-                    btn_plot.grid(row=0, column=0)
-                    v_sep.grid(row=0, column=1)
-                    h_sep.grid(row=1, column=0)
+                btn_plot.pack(fill=tk.BOTH, expand=True)
 
     def set_button_colors(self, val: float):
         """
