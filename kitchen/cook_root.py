@@ -58,13 +58,13 @@ class CookDataROOT(Chef):
 
         self.total_diff_time = None
 
-        self._option_list_var: List[str] = ["hits", "Hz", "saetas"]
+        self._option_list_var: List[str] = ["raw hits", "hits rate", "reco. hits", "reco. rate"]
         self.current_var: str = self._option_list_var[0]
 
-        self.all_data = None # np.zeros((NROW, NCOL), dtype=np.uint32)
+        self.raw_hits = None # np.zeros((NROW, NCOL), dtype=np.uint32)
+        self.raw_hits_hz = None
         self.saetas = None
-        self.mean = None
-        # TODO: If mean is not none -> Calculate data, else pass cached data. (the same for saetas)
+        # TODO: If raw_hits_hz is not none -> Calculate data, else pass cached data. (the same for saetas)
 
     def read_data(self) -> np.array:
         """
@@ -84,25 +84,25 @@ class CookDataROOT(Chef):
         tstamp_to = int(file_to)
 
         # Clear Data
-        if self.current_var == "saetas":
+        if self.current_var == "reco. hits":
             self.saetas = np.zeros((NROW, NCOL), dtype=np.uint32)
-        elif self.current_var in ["hits", "Hz"]:
-            self.all_data = np.zeros((NROW, NCOL), dtype=np.uint32)
+        elif self.current_var in ["raw hits", "hits rate"]:
+            self.raw_hits = np.zeros((NROW, NCOL), dtype=np.uint32)
 
         for filename in sorted(os.listdir(ROOT_DATA_DIR)):
             if not filename.endswith('.root'): continue
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
-                if self.current_var == "saetas":
+                if self.current_var == "reco. hits":
                     self.get_rpc_saeta_array(join_path(self.main_data_dir, filename))
-                elif self.current_var in ["hits", "Hz"]:
+                elif self.current_var in ["raw hits", "hits rate"]:
                     self.get_raw_hits_array(join_path(self.main_data_dir, filename))
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
         print("100%\tdone")
 
     def get_rpc_saeta_array(self, full_path:str):
         """
-        Set all hits used in reconstruction in chosen detector plane to all_data
+        Set all hits used in reconstruction in chosen detector plane to raw_hits
         attribute of this class.
 
         :param full_path: full path to the root file.
@@ -172,7 +172,7 @@ class CookDataROOT(Chef):
 
     def get_raw_hits_array(self, full_path: str):
         """
-        Set all hits in chosen detector plane to all_data attribute of this class.
+        Set all hits in chosen detector plane to raw_hits attribute of this class.
 
         :param full_path: full path to the root file.
         """
@@ -199,7 +199,7 @@ class CookDataROOT(Chef):
             ]
         )
 
-        self.all_data += hits.astype(np.uint32)
+        self.raw_hits += hits.astype(np.uint32)
 
     def update(self, from_date=None, to_date=None,
                plane_name: str = "T1", var_to_update: str = None):
@@ -213,19 +213,18 @@ class CookDataROOT(Chef):
             self.plane_name = plane_name
 
             # TODO: Check if values are in memory already
-            if var_to_update == "hits":
+            if var_to_update == "raw hits":
                 self.current_var = var_to_update
                 self.read_data()
-            elif var_to_update == "Hz":
-                # FIXME: Fails when loading before saetas.
+            elif var_to_update == "hits rate":
                 self.current_var = var_to_update
                 self.read_data()
 
-                # FIXME: It won't work if there is missing data in range (mean will be wrong)
+                # FIXME: It won't work if there is missing data in range (raw_hits_hz will be wrong)
                 #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
                 self.total_diff_time = self.to_date - self.from_date
-                self.mean = self.all_data / self.total_diff_time.total_seconds()
-            elif var_to_update == "saetas":
+                self.raw_hits_hz = self.raw_hits / self.total_diff_time.total_seconds()
+            elif var_to_update == "reco. hits":
                 self.current_var = var_to_update
                 self.read_data()
 

@@ -69,9 +69,9 @@ class CellsAppROOT(CellsApp):
         :return: tk.Button object
         """
         value_name = self.choice_math_val.get()
-        if value_name == "Hz":
+        if value_name == "hits rate":
             txt = f"{self.get_math_value(val=value_name)[i, j]:.1f} Hz"
-        elif value_name in ["saetas", "hits"]:
+        elif value_name in ["reco. hits", "raw hits"]:
             txt = f"{self.get_math_value(val=value_name)[i, j]:.0f}"
         else:
             raise Exception("Problem in grid_button method with chosen variable name.")
@@ -96,16 +96,16 @@ class CellsAppROOT(CellsApp):
         """
         Function which returns the array corresponding to the given string.
 
-        :param val: String with the name of the desired array (hits, Hz, saetas).
+        :param val: String with the name of the desired array ("raw hits", "hits rate", "reco. hits").
         :return: Array with the shape of the detector plane.
         """
         if self.from_date is None or self.to_date is None:
             return 0
-        if val == "hits":
-            return self.inp_dt.all_data
-        elif val == "Hz":
-            return self.inp_dt.mean
-        elif val == "saetas":
+        if val == "raw hits":
+            return self.inp_dt.raw_hits
+        elif val == "hits rate":
+            return self.inp_dt.raw_hits_hz
+        elif val == "reco. hits":
             return self.inp_dt.saetas
         else:
             raise Exception("Failed val in get_math_value()")

@@ -129,7 +129,7 @@ class CellsApp:
         opt_plane_name.config(bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # CHOOSE VARIABLE TO SHOW
-        lbl_var_color = tk.Label(master=self.frm_options, text="Variable to color: ",
+        lbl_var_color = tk.Label(master=self.frm_options, text="Show data:",
                                  bg=self.bg_default, fg=self.fg_default)
         option_list_var = self.inp_dt.option_list_var  #
         self.choice_math_val = tk.StringVar(master=self.frm_options)
@@ -215,12 +215,16 @@ class CellsApp:
         self.frm_cells = tk.Frame(master=self.frm_display, bg=self.bg_default)
         self.frm_cells.grid(row=0, column=0, sticky="news")
 
+        # TRB frames:
         frm_trb_nw= tk.Frame(master=self.frm_cells, bg=self.bg_default)
         frm_trb_nw.grid(row=1, column=1, sticky="news", padx=5, pady=5)
+
         frm_trb_ne= tk.Frame(master=self.frm_cells, bg=self.bg_default)
         frm_trb_ne.grid(row=1, column=2, sticky="news", padx=5, pady=5)
+
         frm_trb_sw= tk.Frame(master=self.frm_cells, bg=self.bg_default)
         frm_trb_sw.grid(row=2, column=1, sticky="news", padx=5, pady=5)
+
         frm_trb_se= tk.Frame(master=self.frm_cells, bg=self.bg_default)
         frm_trb_se.grid(row=2, column=2, sticky="news", padx=5, pady=5)
 
