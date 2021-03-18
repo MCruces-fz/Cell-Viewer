@@ -242,6 +242,8 @@ class CellsApp:
                     frame = frm_trb_se
                 elif i < NROW / 2 and j >= NCOL / 2:
                     frame = frm_trb_ne
+                else:
+                    raise Exception("Error choosing TRB number in CellsApp.draw_cells()")
 
                 frm_cell = tk.Frame(
                     master=frame,

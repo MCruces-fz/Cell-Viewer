@@ -64,6 +64,7 @@ class CookDataROOT(Chef):
         self.raw_hits = None # np.zeros((NROW, NCOL), dtype=np.uint32)
         self.raw_hits_hz = None
         self.saetas = None
+        self.saetas_hz = None
         # TODO: If raw_hits_hz is not none -> Calculate data, else pass cached data. (the same for saetas)
 
     def read_data(self) -> np.array:
@@ -84,7 +85,7 @@ class CookDataROOT(Chef):
         tstamp_to = int(file_to)
 
         # Clear Data
-        if self.current_var == "reco. hits":
+        if self.current_var in ["reco. hits", "reco. rate"]:
             self.saetas = np.zeros((NROW, NCOL), dtype=np.uint32)
         elif self.current_var in ["raw hits", "hits rate"]:
             self.raw_hits = np.zeros((NROW, NCOL), dtype=np.uint32)
@@ -93,7 +94,7 @@ class CookDataROOT(Chef):
             if not filename.endswith('.root'): continue
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
-                if self.current_var == "reco. hits":
+                if self.current_var in ["reco. hits", "reco. rate"]:
                     self.get_rpc_saeta_array(join_path(self.main_data_dir, filename))
                 elif self.current_var in ["raw hits", "hits rate"]:
                     self.get_raw_hits_array(join_path(self.main_data_dir, filename))
@@ -227,4 +228,15 @@ class CookDataROOT(Chef):
             elif var_to_update == "reco. hits":
                 self.current_var = var_to_update
                 self.read_data()
+            elif var_to_update == "reco. rate":
+                self.current_var = var_to_update
+                self.read_data()
+
+                # FIXME: It won't work if there is missing data in range (raw_hits_hz will be wrong)
+                #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
+                self.total_diff_time = self.to_date - self.from_date
+                self.saetas_hz = self.saetas / self.total_diff_time.total_seconds()
+
+            else:
+                raise Exception("Error choosing name in CookDataROOT.update()")
 
