@@ -69,8 +69,10 @@ class CellsAppROOT(CellsApp):
         :return: tk.Button object
         """
         value_name = self.choice_math_val.get()
-        if value_name in ["hits rate", "reco. rate"]:
+        if value_name == "hits rate":
             txt = f"{self.get_math_value(val=value_name)[i, j]:.1f} Hz"
+        if value_name == "reco. rate":
+            txt = f"{self.get_math_value(val=value_name)[i, j]:.3f}"
         elif value_name in ["reco. hits", "raw hits"]:
             txt = f"{self.get_math_value(val=value_name)[i, j]:.0f}"
         else:
