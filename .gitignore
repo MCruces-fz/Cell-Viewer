@@ -11,7 +11,7 @@ __pycache__/
 s*.vim
 *_debug.py
 store/*
-!store/CellViewer-Reco-T1.png
+!store/CV-15Mar-*.png
 
 # Distribution / packaging
 .Python
