@@ -61,7 +61,7 @@ class CookDataROOT(Chef):
         self._option_list_var: List[str] = ["raw hits", "hits rate", "reco. hits", "reco. rate"]
         self.current_var: str = self._option_list_var[0]
 
-        self.raw_hits = None # np.zeros((NROW, NCOL), dtype=np.uint32)
+        self.raw_hits = None  # np.zeros((NROW, NCOL), dtype=np.uint32)
         self.raw_hits_hz = None
         self.saetas = None
         self.saetas_hz = None
@@ -101,7 +101,7 @@ class CookDataROOT(Chef):
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
         print("100%\tdone")
 
-    def get_rpc_saeta_array(self, full_path:str):
+    def get_rpc_saeta_array(self, full_path: str):
         """
         Set all hits used in reconstruction in chosen detector plane to raw_hits
         attribute of this class.
@@ -145,7 +145,6 @@ class CookDataROOT(Chef):
                     if plane == trbnum:
                         trb_nhits += 1
                 print(f"{trb_nhits}\t#Hits in plane {self.plane_name}")
-
 
             k_indices = []
             saetas_per_index = {}
@@ -239,4 +238,3 @@ class CookDataROOT(Chef):
 
             else:
                 raise Exception("Error choosing name in CookDataROOT.update()")
-

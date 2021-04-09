@@ -12,17 +12,21 @@ https://stackoverflow.com/questions/10865116/tkinter-creating-buttons-in-for-loo
 """
 
 import numpy as np
-from utils.tkinter_modules import tk, ttk, DateEntry
-
 from matplotlib import cm
 from matplotlib.colors import Normalize, to_hex
-from utils.const import NROW, NCOL
+from typing import Union
 
+from utils.tkinter_modules import tk, ttk, DateEntry
+from utils.const import NROW, NCOL
 from kitchen.chef import Chef
+from kitchen.cook_root import CookDataROOT
+from kitchen.cook_ascii import CookDataASCII
+
+ChefObj = Union[Chef, CookDataROOT, CookDataASCII]
 
 
 class CellsApp:
-    def __init__(self, chef_object: Chef, window_title=None, theme: str = "dark"):
+    def __init__(self, chef_object: ChefObj, window_title=None, theme: str = "dark"):
         """
         Constructor of the GUI
 
@@ -184,8 +188,12 @@ class CellsApp:
 
         # normalize item number values to colormap
         numpy_value = self.get_math_value(val=self.choice_math_val.get())
-        min_val = np.min(numpy_value)
-        max_val = np.max(numpy_value)
+        if self.choice_math_val.get().endswith("rate"):
+            min_val = 0
+            max_val = 0.8
+        else:
+            min_val = np.min(numpy_value)
+            max_val = np.max(numpy_value)
         norm = Normalize(vmin=min_val, vmax=max_val)
         self.mapper = cm.ScalarMappable(norm=norm, cmap=self.choice_cmap.get())
 
@@ -216,16 +224,16 @@ class CellsApp:
         self.frm_cells.grid(row=0, column=0, sticky="news")
 
         # TRB frames:
-        frm_trb_nw= tk.Frame(master=self.frm_cells, bg=self.bg_default)
+        frm_trb_nw = tk.Frame(master=self.frm_cells, bg=self.bg_default)
         frm_trb_nw.grid(row=1, column=1, sticky="news", padx=5, pady=5)
 
-        frm_trb_ne= tk.Frame(master=self.frm_cells, bg=self.bg_default)
+        frm_trb_ne = tk.Frame(master=self.frm_cells, bg=self.bg_default)
         frm_trb_ne.grid(row=1, column=2, sticky="news", padx=5, pady=5)
 
-        frm_trb_sw= tk.Frame(master=self.frm_cells, bg=self.bg_default)
+        frm_trb_sw = tk.Frame(master=self.frm_cells, bg=self.bg_default)
         frm_trb_sw.grid(row=2, column=1, sticky="news", padx=5, pady=5)
 
-        frm_trb_se= tk.Frame(master=self.frm_cells, bg=self.bg_default)
+        frm_trb_se = tk.Frame(master=self.frm_cells, bg=self.bg_default)
         frm_trb_se.grid(row=2, column=2, sticky="news", padx=5, pady=5)
 
         tk.Grid.rowconfigure(self.frm_cells, index=list(range(NROW)), weight=1, minsize=0)
