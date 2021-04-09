@@ -71,12 +71,13 @@ class CellsAppROOT(CellsApp):
         value_name = self.choice_math_val.get()
         if value_name == "hits rate":
             txt = f"{self.get_math_value(val=value_name)[i, j]:.1f} Hz"
-        if value_name == "reco. rate":
+        elif value_name == "reco. rate":
             txt = f"{self.get_math_value(val=value_name)[i, j]:.3f}"
         elif value_name in ["reco. hits", "raw hits"]:
             txt = f"{self.get_math_value(val=value_name)[i, j]:.0f}"
         else:
-            raise Exception("Problem in grid_button method with chosen variable name.")
+            raise Exception(f"Problem in grid_button method with chosen variable name, {value_name} is"
+                            f"not in [hits rate, reco. rate, reco. hits, raw hits]")
 
         button_obj = tk.Button(master=master,
                                text=txt,
