@@ -14,7 +14,7 @@ https://stackoverflow.com/questions/10865116/tkinter-creating-buttons-in-for-loo
 import numpy as np
 from matplotlib import cm
 from matplotlib.colors import Normalize, to_hex
-from typing import Union
+from typing import Union, List
 
 from utils.tkinter_modules import tk, ttk, DateEntry
 from utils.const import NROW, NCOL
@@ -59,6 +59,7 @@ class CellsApp:
         # --- Frames:
         self.frm_options = tk.Frame(master=self.window, bg=self.bg_default)
         self.frm_datime = tk.Frame(master=self.frm_options, bg=self.bg_default)
+        self.frm_choices = tk.Frame(master=self.frm_options, bg=self.bg_default)
         self.frm_display = None
         self.frm_cells = None
         self.frm_colormap = None
@@ -80,14 +81,10 @@ class CellsApp:
         self.plane_name = "T1"
         self.choice_math_val = None
         self.choice_plane_var = None
-        self.ok_var = tk.IntVar()
 
         # L O G I C
         # Initiates first widget:
         self.choose_options()
-        # Wait while self.refresh_cells method is not executed
-        # Continue pressing "Ok" button
-        self.frm_options.wait_variable(self.ok_var)
 
         # M A I N - L O O P
         self.main_loop()
@@ -98,9 +95,6 @@ class CellsApp:
 
         This sets the frame where the buttons to choose options are placed.
         """
-
-        # FRAME THAT ENCLOSES   E V E R Y T H I N G   E L S E  (all options)
-        self.frm_options.pack(fill=tk.X, expand=True)
 
         # CHOOSE DATE-TIME OPTIONS
         # Label: "Choose dates 'dd/mm/yyyy'"
@@ -124,32 +118,32 @@ class CellsApp:
                                 style='my.DateEntry')
 
         # CHOOSE PLANE NAME
-        lbl_plane = tk.Label(master=self.frm_options, text="Plane: ",
+        lbl_plane = tk.Label(master=self.frm_choices, text="Plane: ",
                              bg=self.bg_default, fg=self.fg_default)
         option_list_plane = ["T1", "T3", "T4"]
-        self.choice_plane_var = tk.StringVar(master=self.frm_options)
+        self.choice_plane_var = tk.StringVar(master=self.frm_choices)
         self.choice_plane_var.set(option_list_plane[0])
-        opt_plane_name = tk.OptionMenu(self.frm_options, self.choice_plane_var, *option_list_plane)
+        opt_plane_name = tk.OptionMenu(self.frm_choices, self.choice_plane_var, *option_list_plane)
         opt_plane_name.config(bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # CHOOSE VARIABLE TO SHOW
-        lbl_var_color = tk.Label(master=self.frm_options, text="Show data:",
+        lbl_var_color = tk.Label(master=self.frm_choices, text="Show data:",
                                  bg=self.bg_default, fg=self.fg_default)
         option_list_var = self.inp_dt.option_list_var  #
-        self.choice_math_val = tk.StringVar(master=self.frm_options)
+        self.choice_math_val = tk.StringVar(master=self.frm_choices)
         self.choice_math_val.set(option_list_var[0])
-        opt_variable_color = tk.OptionMenu(self.frm_options, self.choice_math_val, *option_list_var)
+        opt_variable_color = tk.OptionMenu(self.frm_choices, self.choice_math_val, *option_list_var)
         opt_variable_color.config(bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # CHOOSE COLORMAP
-        lbl_cmap = tk.Label(master=self.frm_options, text="Color map: ",
+        lbl_cmap = tk.Label(master=self.frm_choices, text="Color map: ",
                             bg=self.bg_default, fg=self.fg_default)
         option_list_cmap = ["jet", "inferno", "plasma", "Pastel2",
                             "copper", "cool", "gist_rainbow",
                             "viridis", "winter", "twilight"]
-        self.choice_cmap = tk.StringVar(master=self.frm_options)
+        self.choice_cmap = tk.StringVar(master=self.frm_choices)
         self.choice_cmap.set(option_list_cmap[0])
-        opt_variable_cmap = tk.OptionMenu(self.frm_options, self.choice_cmap, *option_list_cmap)
+        opt_variable_cmap = tk.OptionMenu(self.frm_choices, self.choice_cmap, *option_list_cmap)
         opt_variable_cmap.config(bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # OK Button!
@@ -157,36 +151,41 @@ class CellsApp:
                              command=self.refresh_cells, bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # - G R I D -
-        self.frm_datime.grid(row=0, column=0, rowspan=3, columnspan=4)
+
+        # FRAME THAT ENCLOSES   E V E R Y T H I N G   E L S E  (all options)
+        self.frm_options.pack(fill=tk.X, expand=True)
+        self.grid_configure(self.frm_options, n_cols=2, n_rows=2)
+
+        self.frm_datime.grid(row=1, column=1)
         lbl_date.grid(row=0, column=0, columnspan=2)
         lbl_from.grid(row=1, column=0)
         self.cal_from.grid(row=1, column=1)
         lbl_to.grid(row=2, column=0)
         self.cal_to.grid(row=2, column=1)
 
-        lbl_plane.grid(row=3, column=0)
-        opt_plane_name.grid(row=4, column=0, rowspan=2)
+        self.frm_choices.grid(row=1, column=3)
+        lbl_plane.grid(row=1, column=1)
+        opt_plane_name.grid(row=2, column=1, rowspan=2)
 
-        lbl_var_color.grid(row=3, column=1)
-        opt_variable_color.grid(row=4, column=1, rowspan=2)
+        lbl_var_color.grid(row=1, column=2)
+        opt_variable_color.grid(row=2, column=2, rowspan=2)
 
-        lbl_cmap.grid(row=3, column=2)  # (row=0, column=4)
-        opt_variable_cmap.grid(row=4, column=2, rowspan=2)
+        lbl_cmap.grid(row=1, column=3)  # (row=0, column=4)
+        opt_variable_cmap.grid(row=2, column=3, rowspan=2)
 
-        btn_draw.grid(row=6, column=0, columnspan=3)
+        btn_draw.grid(row=3, rowspan=2, column=1, columnspan=3)
 
     def refresh_cells(self):
         """
         Action fot the OK button. It must refresh all cell buttons if necessary
         """
-        self.ok_var.set(1)
         self.update_datetime()
         self.plane_name = self.choice_plane_var.get()
 
         self.inp_dt.update(from_date=self.from_date, to_date=self.to_date,
                            plane_name=self.plane_name, var_to_update=self.choice_math_val.get())
 
-        # normalize item number values to colormap
+        # Normalize item number values to colormap
         numpy_value = self.get_math_value(val=self.choice_math_val.get())
         if self.choice_math_val.get().endswith("rate"):
             min_val = 0
@@ -202,8 +201,44 @@ class CellsApp:
         except AttributeError:
             pass
 
+        # Here are packed cells and colormap
+        self.frm_display = tk.Frame(master=self.window, bg=self.bg_default)
+        self.frm_display.pack(fill=tk.BOTH, expand=True)
+        self.grid_configure(self.frm_display, n_cols=2, n_rows=2)
+
         self.draw_cells()
         self.draw_colormap_bar(min_val, max_val)
+
+    @staticmethod
+    def grid_configure(frame: Union[tk.Frame, ttk.Frame], n_cols: int, n_rows: int,
+                       w_cols: List[int] = None, w_rows: List[int] = None):
+        """
+        Applies column and row configuration to get window fitting.
+
+        :param frame: Frame object.
+        :param n_cols: Number of columns to fit.
+        :param n_rows: Number of rows to fit.
+        :param w_cols: (optional) list with column weights.
+        :param w_rows: (optional) list with row weights.
+        """
+
+        if w_cols is not None or w_rows is not None:
+            if not len(w_cols) == n_cols: raise Exception("Please: len(w_cols) == n_cols")
+            if not len(w_rows) == n_rows: raise Exception("Please: len(w_rows) == n_rows")
+        # else:
+        #     w_cols = [1] * n_cols
+        #     w_rows = [1] * n_rows
+
+        for c, col in enumerate(range(0, 2 * n_cols + 1, 2)):
+            frame.grid_columnconfigure(
+                col,
+                weight=1 if w_cols is None else w_cols[c]
+            )
+        for r, row in enumerate(range(0, 2 * n_rows + 1, 2)):
+            frame.grid_rowconfigure(
+                row,
+                weight=1 if w_rows is None else w_rows[r]
+            )
 
     def update_datetime(self):
         """
@@ -215,13 +250,10 @@ class CellsApp:
         """
         This sets the frame where the cell buttons are placed
         """
-        # packed cells and colormap
-        self.frm_display = tk.Frame(master=self.window, bg=self.bg_default)
-        self.frm_display.pack(fill=tk.BOTH, expand=True)
 
         # packed cells
         self.frm_cells = tk.Frame(master=self.frm_display, bg=self.bg_default)
-        self.frm_cells.grid(row=0, column=0, sticky="news")
+        self.frm_cells.grid(row=1, column=1, sticky="news")
 
         # TRB frames:
         frm_trb_nw = tk.Frame(master=self.frm_cells, bg=self.bg_default)
@@ -304,7 +336,10 @@ class CellsApp:
         """
         # FRAME THAT ENCLOSES  E V E R Y T H I N G  E L S E  (all options)
         self.frm_colormap = tk.Frame(master=self.frm_display, bg=self.bg_default, width=500)
-        self.frm_colormap.grid(row=0, column=1, columnspan=3, sticky="news", ipadx=10, padx=5)
+        self.frm_colormap.grid(
+            row=1, column=3, sticky="news",
+            ipadx=10, padx=5, ipady=10, pady=5
+        )
 
         steps_number = 20
         step_size = (max_val - min_val) / steps_number
