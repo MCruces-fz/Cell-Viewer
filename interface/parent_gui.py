@@ -34,11 +34,7 @@ class CellsApp:
             - METHOD:
                 * update(from_date, to_date, plane_name)
             - ATTRIBUTES:
-                * all_data
-                * mean
-                * std
-                * skewness
-                * kurtosis
+                * ...
         :param window_title: (optional) String with the title of the window
         :param theme: (optional) dark or light (default dark).
         """
@@ -60,8 +56,8 @@ class CellsApp:
         self.frm_options = tk.Frame(master=self.window, bg=self.bg_default)
         self.frm_datime = tk.Frame(master=self.frm_options, bg=self.bg_default)
         self.frm_choices = tk.Frame(master=self.frm_options, bg=self.bg_default)
+        self.frm_display = tk.Frame(master=self.window, bg=self.bg_default)
         self.frm_mmbos = None
-        self.frm_display = None
         self.frm_cells = None
         self.frm_colormap = None
         # --- Labels:
@@ -176,6 +172,9 @@ class CellsApp:
 
         btn_draw.grid(row=3, rowspan=2, column=1, columnspan=3)
 
+        self.frm_display.pack(fill=tk.BOTH, expand=True)
+        self.grid_configure(self.frm_display, n_cols=2, n_rows=2)
+
     def refresh_cells(self):
         """
         Action fot the OK button. It must refresh all cell buttons if necessary
@@ -186,7 +185,16 @@ class CellsApp:
         self.inp_dt.update(from_date=self.from_date, to_date=self.to_date,
                            plane_name=self.plane_name, var_to_update=self.choice_math_val.get())
 
-        # Normalize item number values to colormap
+        min_val, max_val = self.set_mapper()
+        self.draw_cells()
+        self.draw_colormap_bar(min_val, max_val)
+
+    def set_mapper(self):
+        """
+        Normalize item number values to colormap
+
+        :return: Minimum and maximum values
+        """
         numpy_value = self.get_math_value(val=self.choice_math_val.get())
         if self.choice_math_val.get().endswith("rate"):
             min_val = 0
@@ -197,18 +205,7 @@ class CellsApp:
         norm = Normalize(vmin=min_val, vmax=max_val)
         self.mapper = cm.ScalarMappable(norm=norm, cmap=self.choice_cmap.get())
 
-        try:
-            self.frm_display.destroy()
-        except AttributeError:
-            pass
-
-        # Here are packed cells and colormap
-        self.frm_display = tk.Frame(master=self.window, bg=self.bg_default)
-        self.frm_display.pack(fill=tk.BOTH, expand=True)
-        self.grid_configure(self.frm_display, n_cols=2, n_rows=2)
-
-        self.draw_cells()
-        self.draw_colormap_bar(min_val, max_val)
+        return min_val, max_val
 
     @staticmethod
     def grid_configure(frame: Union[tk.Frame, ttk.Frame], n_cols: int, n_rows: int,
@@ -251,6 +248,9 @@ class CellsApp:
         """
         This sets the frame where the cell buttons are placed
         """
+
+        try: self.frm_cells.destroy()
+        except AttributeError: pass
 
         # packed cells
         self.frm_cells = tk.Frame(master=self.frm_display, bg=self.bg_default)
@@ -335,6 +335,10 @@ class CellsApp:
         """
         This sets the frame where the buttons to choose options are placed.
         """
+
+        try: self.frm_colormap.destroy()
+        except AttributeError: pass
+
         # FRAME THAT ENCLOSES  E V E R Y T H I N G  E L S E  (all options)
         self.frm_colormap = tk.Frame(master=self.frm_display, bg=self.bg_default, width=500)
         self.frm_colormap.grid(
