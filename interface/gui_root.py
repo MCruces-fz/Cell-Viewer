@@ -68,50 +68,49 @@ class CellsAppROOT(CellsApp):
 
         sum_mb1 = self.mambo_sum('MB1')
         btn_mb1 = tk.Button(
-                self.frm_mmbos, 
-                text=f"{sum_mb1}", 
-                command=lambda n="MB1": print(n), 
-                bg=self.bg_default, 
-                fg=self.fg_default, 
-                bd=0
-                )
+            self.frm_mmbos,
+            text=f"{sum_mb1}",
+            command=lambda n="MB1": print(n),
+            bg=self.bg_default,
+            fg=self.fg_default,
+            bd=0
+        )
         sum_mb2 = self.mambo_sum('MB2')
         btn_mb2 = tk.Button(
-                self.frm_mmbos, 
-                text=f"{sum_mb2}", 
-                command=lambda n="MB2": print(n), 
-                bg=self.bg_default, 
-                fg=self.fg_default, 
-                bd=0
-                )
+            self.frm_mmbos,
+            text=f"{sum_mb2}",
+            command=lambda n="MB2": print(n),
+            bg=self.bg_default,
+            fg=self.fg_default,
+            bd=0
+        )
         sum_mb3 = self.mambo_sum('MB3')
         btn_mb3 = tk.Button(
-                self.frm_mmbos, 
-                text=f"{sum_mb3}", 
-                command=lambda n="MB3": print(n), 
-                bg=self.bg_default, 
-                fg=self.fg_default, 
-                bd=0
-                )
+            self.frm_mmbos,
+            text=f"{sum_mb3}",
+            command=lambda n="MB3": print(n),
+            bg=self.bg_default,
+            fg=self.fg_default,
+            bd=0
+        )
         sum_mb4 = self.mambo_sum('MB4')
         btn_mb4 = tk.Button(
-                self.frm_mmbos, 
-                text=f"{sum_mb4}", 
-                command=lambda n="MB4": print(n), 
-                bg=self.bg_default, 
-                fg=self.fg_default, 
-                bd=0
-                )
+            self.frm_mmbos,
+            text=f"{sum_mb4}",
+            command=lambda n="MB4": print(n),
+            bg=self.bg_default,
+            fg=self.fg_default,
+            bd=0
+        )
         sum_all = self.mambo_sum("ALL")
         btn_all = tk.Button(
-                self.frm_mmbos, 
-                text=f"{sum_all}", 
-                command=lambda n="All MBs": print(n), 
-                bg=self.bg_default, 
-                fg=self.fg_default, 
-                bd=0
-                )
-
+            self.frm_mmbos,
+            text=f"{sum_all}",
+            command=lambda n="All MBs": print(n),
+            bg=self.bg_default,
+            fg=self.fg_default,
+            bd=0
+        )
 
         self.frm_mmbos.grid(row=1, column=4)
         btn_mb1.grid(row=2, column=2, sticky="news")
@@ -132,13 +131,13 @@ class CellsAppROOT(CellsApp):
             return 0
 
         if mambo in ["MB1", "mb1", 1]:
-            total = np.sum(numpy_data[NROW//2:, NCOL//2:])
+            total = np.sum(numpy_data[NROW // 2:, NCOL // 2:])
         elif mambo in ["MB2", "mb2", 2]:
-            total = np.sum(numpy_data[:NROW//2, NCOL//2:])
+            total = np.sum(numpy_data[:NROW // 2, NCOL // 2:])
         elif mambo in ["MB3", "mb3", 3]:
-            total = np.sum(numpy_data[:NROW//2, :NCOL//2])
+            total = np.sum(numpy_data[:NROW // 2, :NCOL // 2])
         elif mambo in ["MB4", "mb4", 4]:
-            total = np.sum(numpy_data[NROW//2:, :NCOL//2])
+            total = np.sum(numpy_data[NROW // 2:, :NCOL // 2])
         elif mambo in ["ALL", "all", "All", 0]:
             total = np.sum(numpy_data)
         else:

@@ -126,7 +126,7 @@ class CookDataROOT(Chef):
             ind_leaf = tree.GetLeaf(f"RpcSaeta3Planes.find{trbnum}")
 
             nsaetas = ind_leaf.GetLen()
-            if not nsaetas: 
+            if not nsaetas:
                 continue
 
             # Only Multiplicity One! M1
@@ -156,9 +156,9 @@ class CookDataROOT(Chef):
             for entry in range(nsaetas):
                 k_ind = int(ind_leaf.GetValue(entry))
                 if debug:
-                    if not k_ind in k_indices:
+                    if k_ind not in k_indices:
                         k_indices.append(k_ind)
-                if not k_ind in saetas_per_index:
+                if k_ind not in saetas_per_index:
                     saetas_per_index[k_ind] = 0
                 saetas_per_index[k_ind] += 1
 
