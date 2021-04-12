@@ -13,8 +13,8 @@
 
 # fppercebe directories:
 ASCII_DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/png/"
-# ROOT_DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/root/"
-ROOT_DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/selftrigger/"
+ROOT_DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/test01/"
+# ROOT_DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/selftrigger/"
 TRUFA_LIB_DIR = "/home/mcruces/Documents/GitHub/TRUFA/"
 
 # Number of rows and columns of each detector plane
