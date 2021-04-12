@@ -1,9 +1,11 @@
 from interface.parent_gui import CellsApp
 from kitchen.cook_root import CookDataROOT
 from utils.tkinter_modules import tk
+from utils.const import NCOL, NROW
 
 import numpy as np
 import datetime
+from typing import Union
 
 
 class CellsAppROOT(CellsApp):
@@ -38,6 +40,8 @@ class CellsAppROOT(CellsApp):
         """
 
         super().choose_options()
+
+        # Choose time
         lbl_time = tk.Label(master=self.frm_datime, text='HH:MM (24h)',
                             bg=self.bg_default, fg=self.fg_default)
 
@@ -56,6 +60,91 @@ class CellsAppROOT(CellsApp):
         spx_mins_from.grid(row=1, column=3)
         spx_hour_to.grid(row=2, column=2)
         spx_mins_to.grid(row=2, column=3)
+
+    def show_mambos(self):
+        # Show MMBOS
+
+        self.frm_mmbos = tk.Frame(master=self.frm_options, bg=self.bg_default)
+
+        sum_mb1 = self.mambo_sum('MB1')
+        btn_mb1 = tk.Button(
+                self.frm_mmbos, 
+                text=f"{sum_mb1}", 
+                command=lambda n="MB1": print(n), 
+                bg=self.bg_default, 
+                fg=self.fg_default, 
+                bd=0
+                )
+        sum_mb2 = self.mambo_sum('MB2')
+        btn_mb2 = tk.Button(
+                self.frm_mmbos, 
+                text=f"{sum_mb2}", 
+                command=lambda n="MB2": print(n), 
+                bg=self.bg_default, 
+                fg=self.fg_default, 
+                bd=0
+                )
+        sum_mb3 = self.mambo_sum('MB3')
+        btn_mb3 = tk.Button(
+                self.frm_mmbos, 
+                text=f"{sum_mb3}", 
+                command=lambda n="MB3": print(n), 
+                bg=self.bg_default, 
+                fg=self.fg_default, 
+                bd=0
+                )
+        sum_mb4 = self.mambo_sum('MB4')
+        btn_mb4 = tk.Button(
+                self.frm_mmbos, 
+                text=f"{sum_mb4}", 
+                command=lambda n="MB4": print(n), 
+                bg=self.bg_default, 
+                fg=self.fg_default, 
+                bd=0
+                )
+        sum_all = self.mambo_sum("ALL")
+        btn_all = tk.Button(
+                self.frm_mmbos, 
+                text=f"{sum_all}", 
+                command=lambda n="All MBs": print(n), 
+                bg=self.bg_default, 
+                fg=self.fg_default, 
+                bd=0
+                )
+
+
+        self.frm_mmbos.grid(row=1, column=4)
+        btn_mb1.grid(row=2, column=2, sticky="news")
+        btn_mb2.grid(row=1, column=2, sticky="news")
+        btn_mb3.grid(row=1, column=1, sticky="news")
+        btn_mb4.grid(row=2, column=1, sticky="news")
+        btn_all.grid(row=3, column=1, columnspan=2, sticky="news")
+
+    def mambo_sum(self, mambo: Union[str, int]):
+        """
+        Get sum of values
+
+
+        """
+        numpy_data = self.get_math_value(val=self.choice_math_val.get())
+
+        if type(numpy_data) not in [np.ndarray, np.array]:
+            return 0
+
+        if mambo in ["MB1", "mb1", 1]:
+            total = np.sum(numpy_data[NROW//2:, NCOL//2:])
+        elif mambo in ["MB2", "mb2", 2]:
+            total = np.sum(numpy_data[:NROW//2, NCOL//2:])
+        elif mambo in ["MB3", "mb3", 3]:
+            total = np.sum(numpy_data[:NROW//2, :NCOL//2])
+        elif mambo in ["MB4", "mb4", 4]:
+            total = np.sum(numpy_data[NROW//2:, :NCOL//2])
+        elif mambo in ["ALL", "all", "All", 0]:
+            total = np.sum(numpy_data)
+        else:
+            raise Exception("Wrong value of mambo.")
+
+        return total
 
     def grid_button(self, master: object, i: int, j: int, bg_color: str = "#000000", fg_color: str = "#ffffff"):
         """
@@ -127,3 +216,13 @@ class CellsAppROOT(CellsApp):
             self.cal_to.get_date(),
             datetime.time(hour=self.var_hour_to.get(), minute=self.var_mins_to.get())
         )
+
+    def refresh_cells(self):
+        super().refresh_cells()
+
+        try:
+            self.frm_mmbos.destroy()
+        except AttributeError:
+            pass
+
+        self.show_mambos()

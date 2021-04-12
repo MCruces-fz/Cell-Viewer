@@ -60,6 +60,7 @@ class CellsApp:
         self.frm_options = tk.Frame(master=self.window, bg=self.bg_default)
         self.frm_datime = tk.Frame(master=self.frm_options, bg=self.bg_default)
         self.frm_choices = tk.Frame(master=self.frm_options, bg=self.bg_default)
+        self.frm_mmbos = None
         self.frm_display = None
         self.frm_cells = None
         self.frm_colormap = None
