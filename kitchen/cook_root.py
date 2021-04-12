@@ -126,7 +126,12 @@ class CookDataROOT(Chef):
             ind_leaf = tree.GetLeaf(f"RpcSaeta3Planes.find{trbnum}")
 
             nsaetas = ind_leaf.GetLen()
-            if not nsaetas: continue
+            if not nsaetas: 
+                continue
+
+            # Only Multiplicity One! M1
+            if nsaetas != 1:
+                continue
 
             if debug:
                 print(f"{nsaetas}\t#Saetas")
@@ -181,14 +186,16 @@ class CookDataROOT(Chef):
         tree = file0.Get("T")
         # nentries = tree.GetEntries()
 
+        branch = ["rpcraw", "rpchit"][1]
+
         trbnum = TRB_TAB[self.plane_name]
         # print(f"{self.plane_name}, trbnum = {trbnum}")
         col_branch = rnp.tree2array(tree=tree,
-                                    branches="rpcraw.fCol",
-                                    selection=f"rpcraw.fTrbnum == {trbnum}")
+                                    branches=f"{branch}.fCol",
+                                    selection=f"{branch}.fTrbnum == {trbnum}")
         row_branch = rnp.tree2array(tree=tree,
-                                    branches="rpcraw.fRow",
-                                    selection=f"rpcraw.fTrbnum == {trbnum}")
+                                    branches=f"{branch}.fRow",
+                                    selection=f"{branch}.fTrbnum == {trbnum}")
 
         hits, _, _ = np.histogram2d(
             np.concatenate(row_branch),
