@@ -32,14 +32,14 @@
     #          "rpcraw.fTrbnum==0", "colz text")
 """
 
-import datetime
+# import datetime
 import numpy as np
 import os
 from os.path import join as join_path
 from utils.const import NROW, NCOL, TRB_TAB, ROOT_DATA_DIR, TRUFA_LIB_DIR
 from kitchen.chef import Chef
 import root_numpy as rnp
-from ROOT import gROOT, gSystem, TFile, kTRUE, TCanvas, RDataFrame, gStyle
+from ROOT import gROOT, gSystem, TFile, kTRUE  # , TCanvas, RDataFrame, gStyle
 from ROOT import EnableImplicitMT  # Multi Thread
 
 from typing import List
@@ -92,6 +92,7 @@ class CookDataROOT(Chef):
 
         for filename in sorted(os.listdir(ROOT_DATA_DIR)):
             if not filename.endswith('.root'): continue
+            if not filename.startswith(('tr', 'st')): continue
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
                 if self.current_var in ["reco. hits", "reco. rate"]:
