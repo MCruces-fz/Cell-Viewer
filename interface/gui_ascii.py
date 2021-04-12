@@ -1,4 +1,4 @@
-from interface.parent_gui import CellsApp
+from interface.parent_gui import CellsApp, ChefObj
 import matplotlib.pyplot as plt
 from utils.tkinter_modules import tk
 
@@ -6,6 +6,24 @@ import numpy as np
 
 
 class CellsAppASCII(CellsApp):
+    def __init__(self, chef_object: ChefObj, window_title=None, theme: str = "dark"):
+        """
+        Constructor of the GUI
+
+        :param chef_object: Object to get data. It has to have the following:
+            - METHOD:
+                * update(from_date, to_date, plane_name)
+            - ATTRIBUTES:
+                * all_data
+                * mean
+                * std
+                * skewness
+                * kurtosis
+        :param window_title: (optional) String with the title of the window
+        :param theme: (optional) dark or light (default dark).
+        """
+        super().__init__(chef_object, window_title, theme)
+
     def update_datetime(self):
         self.from_date = self.cal_from.get_date()
         self.to_date = self.cal_from.get_date()
