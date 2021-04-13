@@ -164,11 +164,11 @@ class CellsApp:
         lbl_plane.grid(row=1, column=1)
         opt_plane_name.grid(row=2, column=1, rowspan=2)
 
-        lbl_var_color.grid(row=1, column=2)
-        opt_variable_color.grid(row=2, column=2, rowspan=2)
+        lbl_cmap.grid(row=1, column=2)  # (row=0, column=4)
+        opt_variable_cmap.grid(row=2, column=2, rowspan=2)
 
-        lbl_cmap.grid(row=1, column=3)  # (row=0, column=4)
-        opt_variable_cmap.grid(row=2, column=3, rowspan=2)
+        lbl_var_color.grid(row=4, column=1)
+        opt_variable_color.grid(row=5, column=1, rowspan=2)
 
         btn_draw.grid(row=3, rowspan=2, column=1, columnspan=3)
 
