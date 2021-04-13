@@ -68,6 +68,8 @@ class CookDataROOT(Chef):
         self.saetas_hz = None
         # TODO: If raw_hits_hz is not none -> Calculate data, else pass cached data. (the same for saetas)
 
+        self.last_check_m1 = False
+
     def read_data(self) -> np.array:
         """
         Redefinition of Chef.read_data() method to read data from
@@ -180,7 +182,6 @@ class CookDataROOT(Chef):
                 hits_topo = [0, 0, 0]
                 for k in range(nhits):
                     trb = trb_leaf.GetValue(k)
-                    # hits_topo[int(trbnum)] = [row_leaf.GetValue(k), col_leaf.GetValue(k)]
                     hits_topo[int(trb)] += 1
 
                 if hits_topo != [1, 1, 1]: continue
@@ -189,10 +190,6 @@ class CookDataROOT(Chef):
                     trb = trb_leaf.GetValue(k)
                     if trb == trbnum:
                         hits[int(row_leaf.GetValue(k) - 1), int(col_leaf.GetValue(k) - 1)] += 1
-
-
-
-
 
         else:
             col_branch = rnp.tree2array(tree=tree,
@@ -221,7 +218,8 @@ class CookDataROOT(Chef):
 
         # Update all data only if necessary
         if from_date != self.from_date or to_date != self.to_date or \
-                plane_name != self.plane_name or var_to_update != self.current_var:
+                plane_name != self.plane_name or var_to_update != self.current_var or\
+                self.last_check_m1 != self.check_m1:
             self.from_date = from_date
             self.to_date = to_date
             self.plane_name = plane_name
@@ -252,3 +250,5 @@ class CookDataROOT(Chef):
 
             else:
                 raise Exception("Error choosing name in CookDataROOT.update()")
+
+        self.last_check_m1 = self.check_m1
