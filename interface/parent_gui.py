@@ -145,7 +145,7 @@ class CellsApp:
 
         # OK Button!
         btn_draw = tk.Button(master=self.frm_options, text="Ok",
-                             command=self.refresh_cells, bg=self.bg_default, fg=self.fg_default, bd=0)
+                             command=self.refresh, bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # - G R I D -
 
@@ -175,7 +175,7 @@ class CellsApp:
         self.frm_display.pack(fill=tk.BOTH, expand=True)
         self.grid_configure(self.frm_display, n_cols=2, n_rows=2)
 
-    def refresh_cells(self):
+    def refresh(self):
         """
         Action fot the OK button. It must refresh all cell buttons if necessary
         """

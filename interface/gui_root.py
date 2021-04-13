@@ -228,9 +228,9 @@ class CellsAppROOT(CellsApp):
             datetime.time(hour=self.var_hour_to.get(), minute=self.var_mins_to.get())
         )
 
-    def refresh_cells(self):
+    def refresh(self):
         self.inp_dt.check_m1 = self.chk_m1.get()
 
-        super().refresh_cells()
+        super().refresh()
 
         self.show_mambos()
