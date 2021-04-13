@@ -207,6 +207,8 @@ class CookDataROOT(Chef):
             ]
         )
 
+        # TODO: Representar eventos que en rpchit sólo tengain MT1 == MT3 == MT4 == 1
+
         self.raw_hits += hits.astype(np.uint32)
 
     def update(self, from_date=None, to_date=None,
