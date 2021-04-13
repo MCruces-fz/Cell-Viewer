@@ -1,5 +1,6 @@
 from interface.parent_gui import CellsApp
 from kitchen.cook_root import CookDataROOT
+from kitchen.chef import Chef
 from utils.tkinter_modules import tk
 from utils.const import NCOL, NROW
 
@@ -9,7 +10,8 @@ from typing import Union
 
 
 class CellsAppROOT(CellsApp):
-    def __init__(self, chef_object: CookDataROOT, window_title=None, theme: str = "dark"):
+    def __init__(self, chef_object: Union[Chef, CookDataROOT], window_title=None, theme: str = "dark"):
+        self.chk_m1 = None
         super().__init__(chef_object, window_title, theme)
         self.var_hour_from = None
         self.var_mins_from = None
@@ -61,9 +63,19 @@ class CellsAppROOT(CellsApp):
         spx_hour_to.grid(row=2, column=2)
         spx_mins_to.grid(row=2, column=3)
 
-    def show_mambos(self):
-        # Show MMBOS
+        self.chk_m1 = tk.BooleanVar(master=self.frm_choices)
 
+        chk_multi = tk.Checkbutton(self.frm_choices, text="M1 only", variable=self.chk_m1,
+                                   bg=self.bg_default, fg=self.fg_default, selectcolor=self.bg_default)
+        chk_multi.grid(row=5, column=2)
+
+    def show_mambos(self):
+
+        # Destroy MMBOS frame if it exists
+        try: self.frm_mmbos.destroy()
+        except AttributeError: pass
+
+        # Show MMBOS
         self.frm_mmbos = tk.Frame(master=self.frm_options, bg=self.bg_default)
 
         sum_mb1 = self.mambo_sum('MB1')
@@ -217,11 +229,8 @@ class CellsAppROOT(CellsApp):
         )
 
     def refresh_cells(self):
-        super().refresh_cells()
+        self.inp_dt.check_m1 = self.chk_m1.get()
 
-        try:
-            self.frm_mmbos.destroy()
-        except AttributeError:
-            pass
+        super().refresh_cells()
 
         self.show_mambos()
