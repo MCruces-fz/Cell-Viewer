@@ -12,11 +12,13 @@ from typing import Union
 class CellsAppROOT(CellsApp):
     def __init__(self, chef_object: Union[Chef, CookDataROOT], window_title=None, theme: str = "dark"):
         self.chk_m1 = None
+        self.chk_hz = None
         super().__init__(chef_object, window_title, theme)
         self.var_hour_from = None
         self.var_mins_from = None
         self.var_hour_to = None
         self.var_mins_to = None
+        self.var_max_color = None
 
     def set_spinbox(self, master: object, var: object, f: int = 0, t: int = 1):
         """
@@ -43,7 +45,7 @@ class CellsAppROOT(CellsApp):
 
         super().choose_options()
 
-        # Choose time
+        # CHOOSE TIME
         lbl_time = tk.Label(master=self.frm_datime, text='HH:MM (24h)',
                             bg=self.bg_default, fg=self.fg_default)
 
@@ -63,22 +65,51 @@ class CellsAppROOT(CellsApp):
         spx_hour_to.grid(row=2, column=2)
         spx_mins_to.grid(row=2, column=3)
 
-        self.chk_m1 = tk.BooleanVar(master=self.frm_choices)
+        # CHEKS
+        # Max value to color
+        self.chk_max = tk.BooleanVar(master=self.frm_choices)
+        chk_mx = tk.Checkbutton(self.frm_choices, text="Max: ", variable=self.chk_max,
+                                bg=self.bg_default, fg=self.fg_default, selectcolor=self.bg_default)
+        self.var_max_color = tk.StringVar(master=self.frm_choices, value="0.8")
+        ent_max = tk.Entry(master=self.frm_choices, textvariable=self.var_max_color,
+                           bg=self.bg_default, fg=self.fg_default, width=7)
+        chk_mx.grid(row=4, column=1)
+        ent_max.grid(row=4, column=2)
 
+        # Other checks
+        self.chk_m1 = tk.BooleanVar(master=self.frm_choices)
         chk_multi = tk.Checkbutton(self.frm_choices, text="M1 only", variable=self.chk_m1,
                                    bg=self.bg_default, fg=self.fg_default, selectcolor=self.bg_default)
-        chk_multi.grid(row=5, column=2)
+        chk_multi.grid(row=4, column=3)
+
+        self.chk_hz = tk.BooleanVar(master=self.frm_choices)
+        chk_hertz = tk.Checkbutton(self.frm_choices, text="Rate (Hz)", variable=self.chk_hz,
+                                   bg=self.bg_default, fg=self.fg_default, selectcolor=self.bg_default)
+        chk_hertz.grid(row=5, column=3)
 
     def show_mambos(self):
 
         # Destroy MMBOS frame if it exists
-        try: self.frm_mmbos.destroy()
-        except AttributeError: pass
+        try:
+            self.frm_mmbos.destroy()
+        except AttributeError:
+            pass
 
         # Show MMBOS
         self.frm_mmbos = tk.Frame(master=self.frm_options, bg=self.bg_default)
 
         sum_mb1 = self.mambo_sum('MB1')
+        sum_mb2 = self.mambo_sum('MB2')
+        sum_mb3 = self.mambo_sum('MB3')
+        sum_mb4 = self.mambo_sum('MB4')
+        sum_all = self.mambo_sum("ALL")
+        if self.chk_hz.get():
+            sum_mb1 = np.round(sum_mb1 / 30, 3)
+            sum_mb2 = np.round(sum_mb2 / 30, 3)
+            sum_mb3 = np.round(sum_mb3 / 30, 3)
+            sum_mb4 = np.round(sum_mb4 / 30, 3)
+            sum_all = np.round(sum_all / 120, 3)
+
         btn_mb1 = tk.Button(
             self.frm_mmbos,
             text=f"{sum_mb1}",
@@ -87,7 +118,6 @@ class CellsAppROOT(CellsApp):
             fg=self.fg_default,
             bd=0
         )
-        sum_mb2 = self.mambo_sum('MB2')
         btn_mb2 = tk.Button(
             self.frm_mmbos,
             text=f"{sum_mb2}",
@@ -96,7 +126,6 @@ class CellsAppROOT(CellsApp):
             fg=self.fg_default,
             bd=0
         )
-        sum_mb3 = self.mambo_sum('MB3')
         btn_mb3 = tk.Button(
             self.frm_mmbos,
             text=f"{sum_mb3}",
@@ -105,7 +134,6 @@ class CellsAppROOT(CellsApp):
             fg=self.fg_default,
             bd=0
         )
-        sum_mb4 = self.mambo_sum('MB4')
         btn_mb4 = tk.Button(
             self.frm_mmbos,
             text=f"{sum_mb4}",
@@ -114,7 +142,6 @@ class CellsAppROOT(CellsApp):
             fg=self.fg_default,
             bd=0
         )
-        sum_all = self.mambo_sum("ALL")
         btn_all = tk.Button(
             self.frm_mmbos,
             text=f"{sum_all}",
@@ -168,16 +195,11 @@ class CellsAppROOT(CellsApp):
         :param fg_color: (optional) foreground color.
         :return: tk.Button object
         """
-        value_name = self.choice_math_val.get()
-        if value_name == "hits rate":
-            txt = f"{self.get_math_value(val=value_name)[i, j]:.1f} Hz"
-        elif value_name == "reco. rate":
-            txt = f"{self.get_math_value(val=value_name)[i, j]:.3f}"
-        elif value_name in ["reco. hits", "raw hits"]:
-            txt = f"{self.get_math_value(val=value_name)[i, j]:.0f}"
+        value = self.get_math_value(self.choice_math_val.get())[i, j]
+        if self.chk_hz.get():
+            txt = f"{value:.3f}"
         else:
-            raise Exception(f"Problem in grid_button method with chosen variable name, {value_name} is"
-                            f"not in [hits rate, reco. rate, reco. hits, raw hits]")
+            txt = f"{value:.0f}"
 
         button_obj = tk.Button(master=master,
                                text=txt,
@@ -204,16 +226,7 @@ class CellsAppROOT(CellsApp):
         """
         if self.from_date is None or self.to_date is None:
             return 0
-        if val == "raw hits":
-            return self.inp_dt.raw_hits
-        elif val == "hits rate":
-            return self.inp_dt.raw_hits_hz
-        elif val == "reco. hits":
-            return self.inp_dt.saetas
-        elif val == "reco. rate":
-            return self.inp_dt.saetas_hz
-        else:
-            raise Exception("Failed val in get_math_value()")
+        return self.inp_dt.plane_event
 
     def update_datetime(self):
         """
@@ -230,6 +243,7 @@ class CellsAppROOT(CellsApp):
 
     def refresh(self):
         self.inp_dt.check_m1 = self.chk_m1.get()
+        self.inp_dt.check_hz = self.chk_hz.get()
 
         super().refresh()
 

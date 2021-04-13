@@ -78,6 +78,10 @@ class CellsApp:
         self.plane_name = "T1"
         self.choice_math_val = None
         self.choice_plane_var = None
+        self.var_max_color = None
+        # self.chk_m1 = None
+        # self.chk_hz = None
+        self.chk_max= None
 
         # L O G I C
         # Initiates first widget:
@@ -126,7 +130,7 @@ class CellsApp:
         # CHOOSE VARIABLE TO SHOW
         lbl_var_color = tk.Label(master=self.frm_choices, text="Show data:",
                                  bg=self.bg_default, fg=self.fg_default)
-        option_list_var = self.inp_dt.option_list_var  #
+        option_list_var = self.inp_dt.option_list_var
         self.choice_math_val = tk.StringVar(master=self.frm_choices)
         self.choice_math_val.set(option_list_var[0])
         opt_variable_color = tk.OptionMenu(self.frm_choices, self.choice_math_val, *option_list_var)
@@ -167,8 +171,8 @@ class CellsApp:
         lbl_cmap.grid(row=1, column=2)  # (row=0, column=4)
         opt_variable_cmap.grid(row=2, column=2, rowspan=2)
 
-        lbl_var_color.grid(row=4, column=1)
-        opt_variable_color.grid(row=5, column=1, rowspan=2)
+        lbl_var_color.grid(row=1, column=3)
+        opt_variable_color.grid(row=2, column=3, rowspan=2)
 
         btn_draw.grid(row=3, rowspan=2, column=1, columnspan=3)
 
@@ -196,10 +200,15 @@ class CellsApp:
         :return: Minimum and maximum values
         """
         numpy_value = self.get_math_value(val=self.choice_math_val.get())
-        if self.choice_math_val.get().endswith("rate"):
-            min_val = 0
-            max_val = 0.8
-        else:
+        try:
+            if self.chk_max.get():
+                # TODO: Choose max_val
+                min_val = 0
+                max_val = float(self.var_max_color.get())
+            else:
+                min_val = np.min(numpy_value)
+                max_val = np.max(numpy_value)
+        except Exception:  # FIXME: Better exception, please!
             min_val = np.min(numpy_value)
             max_val = np.max(numpy_value)
         norm = Normalize(vmin=min_val, vmax=max_val)

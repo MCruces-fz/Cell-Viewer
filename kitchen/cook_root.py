@@ -57,18 +57,16 @@ class CookDataROOT(Chef):
         gSystem.Load(join_path(TRUFA_LIB_DIR, "libtunpacker.so"))
 
         self.total_diff_time = None
-        self.check_m1 = False
 
-        self._option_list_var: List[str] = ["raw hits", "hits rate", "reco. hits", "reco. rate"]
+        self._option_list_var: List[str] = ["RAW", "HIT", "SAETA"]
         self.current_var: str = self._option_list_var[0]
 
-        self.raw_hits = None  # np.zeros((NROW, NCOL), dtype=np.uint32)
-        self.raw_hits_hz = None
-        self.saetas = None
-        self.saetas_hz = None
-        # TODO: If raw_hits_hz is not none -> Calculate data, else pass cached data. (the same for saetas)
+        self.plane_event = None
 
+        self.check_m1 = False
+        self.check_hz = False
         self.last_check_m1 = False
+        self.last_check_hz = False
 
     def read_data(self) -> np.array:
         """
@@ -88,26 +86,22 @@ class CookDataROOT(Chef):
         tstamp_to = int(file_to)
 
         # Clear Data
-        if self.current_var in ["reco. hits", "reco. rate"]:
-            self.saetas = np.zeros((NROW, NCOL), dtype=np.uint32)
-        elif self.current_var in ["raw hits", "hits rate"]:
-            self.raw_hits = np.zeros((NROW, NCOL), dtype=np.uint32)
+        self.plane_event = np.zeros((NROW, NCOL), dtype=np.uint32)
 
         for filename in sorted(os.listdir(ROOT_DATA_DIR)):
-            if not filename.endswith('.root'): continue
-            if not filename.startswith(('tr', 'st')): continue
+            if not filename.startswith(('tr', 'st')) or not filename.endswith('.root'): continue
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
-                if self.current_var in ["reco. hits", "reco. rate"]:
+                if self.current_var == "SAETA":
                     self.get_rpc_saeta_array(join_path(self.main_data_dir, filename))
-                elif self.current_var in ["raw hits", "hits rate"]:
+                elif self.current_var in ["RAW", "HIT"]:
                     self.get_raw_hits_array(join_path(self.main_data_dir, filename))
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
         print("100%\tdone")
 
     def get_rpc_saeta_array(self, full_path: str):
         """
-        Set all hits used in reconstruction in chosen detector plane to raw_hits
+        Set all hits used in reconstruction in chosen detector plane to plane_event
         attribute of this class.
 
         :param full_path: full path to the root file.
@@ -148,20 +142,25 @@ class CookDataROOT(Chef):
                     hit = int(hit)
                     col = int(col_leaf.GetValue(hit))
                     row = int(row_leaf.GetValue(hit))
-                    self.saetas[row - 1, col - 1] += saetas_per_index[hit]
+                    self.plane_event[row - 1, col - 1] += saetas_per_index[hit]
 
     def get_raw_hits_array(self, full_path: str):
         """
-        Set all hits in chosen detector plane to raw_hits attribute of this class.
+        Set all hits in chosen detector plane to plane_event attribute of this class.
 
         :param full_path: full path to the root file.
         """
         # Read TTree
         file0 = TFile(full_path, "READ")
         tree = file0.Get("T")
-        # nentries = tree.GetEntries()
 
-        branch = ["rpcraw", "rpchit"][1]
+        if self.current_var == "HIT":
+            branch = "rpchit"
+        elif self.current_var == "RAW":
+            branch = "rpcraw"
+        else:
+            raise Exception("Error choosing branch!")
+
         trbnum = TRB_TAB[self.plane_name]
 
         hits = np.zeros((NROW, NCOL))
@@ -208,47 +207,26 @@ class CookDataROOT(Chef):
                 ]
             )
 
-        # TODO: Representar eventos que en rpchit sólo tengain MT1 == MT3 == MT4 == 1
-
-        self.raw_hits += hits.astype(np.uint32)
+        self.plane_event += hits.astype(np.uint32)
 
     def update(self, from_date=None, to_date=None,
                plane_name: str = "T1", var_to_update: str = None):
-        # super().update(from_date, to_date, plane_name)
 
         # Update all data only if necessary
         if from_date != self.from_date or to_date != self.to_date or \
                 plane_name != self.plane_name or var_to_update != self.current_var or\
-                self.last_check_m1 != self.check_m1:
+                self.last_check_m1 != self.check_m1 or self.last_check_hz != self.check_hz:
             self.from_date = from_date
             self.to_date = to_date
             self.plane_name = plane_name
 
-            # TODO: Check if values are in memory already
-            if var_to_update == "raw hits":
-                self.current_var = var_to_update
-                self.read_data()
-            elif var_to_update == "hits rate":
-                self.current_var = var_to_update
-                self.read_data()
-
+            self.current_var = var_to_update
+            self.read_data()
+            if self.check_hz:
                 # FIXME: It won't work if there is missing data in range (raw_hits_hz will be wrong)
                 #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
                 self.total_diff_time = self.to_date - self.from_date
-                self.raw_hits_hz = self.raw_hits / self.total_diff_time.total_seconds()
-            elif var_to_update == "reco. hits":
-                self.current_var = var_to_update
-                self.read_data()
-            elif var_to_update == "reco. rate":
-                self.current_var = var_to_update
-                self.read_data()
-
-                # FIXME: It won't work if there is missing data in range (raw_hits_hz will be wrong)
-                #  IDEA: cuenta el número de archivos y estima el tiempo a partir de ahí
-                self.total_diff_time = self.to_date - self.from_date
-                self.saetas_hz = self.saetas / self.total_diff_time.total_seconds()
-
-            else:
-                raise Exception("Error choosing name in CookDataROOT.update()")
+                self.plane_event = self.plane_event / self.total_diff_time.total_seconds()
 
         self.last_check_m1 = self.check_m1
+        self.last_check_hz = self.check_hz
