@@ -1,12 +1,15 @@
-from interface.parent_gui import CellsApp, ChefObj
-import matplotlib.pyplot as plt
+from interface.parent_gui import CellsApp
+from kitchen.cook_ascii import CookDataASCII
+from kitchen.chef import Chef
 from utils.tkinter_modules import tk
 
+import matplotlib.pyplot as plt
 import numpy as np
+from typing import Union
 
 
 class CellsAppASCII(CellsApp):
-    def __init__(self, chef_object: ChefObj, window_title=None, theme: str = "dark"):
+    def __init__(self, chef_object: Union[Chef, CookDataASCII], window_title=None, theme: str = "dark"):
         """
         Constructor of the GUI
 
