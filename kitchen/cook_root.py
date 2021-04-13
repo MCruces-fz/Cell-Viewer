@@ -57,6 +57,7 @@ class CookDataROOT(Chef):
         gSystem.Load(join_path(TRUFA_LIB_DIR, "libtunpacker.so"))
 
         self.total_diff_time = None
+        self.check_m1 = False
 
         self._option_list_var: List[str] = ["raw hits", "hits rate", "reco. hits", "reco. rate"]
         self.current_var: str = self._option_list_var[0]
@@ -116,8 +117,6 @@ class CookDataROOT(Chef):
 
         nevents = tree.GetEntries()
 
-        debug = False
-
         trbnum = TRB_TAB[self.plane_name]
         # reco_cells = np.zeros((NCOL, NROW))
 
@@ -127,47 +126,20 @@ class CookDataROOT(Chef):
             ind_leaf = tree.GetLeaf(f"RpcSaeta3Planes.find{trbnum}")
 
             nsaetas = ind_leaf.GetLen()
-            if not nsaetas:
+            if not nsaetas or (self.check_m1 and nsaetas != 1):
                 continue
-
-            # Only Multiplicity One! M1
-            if nsaetas != 1:
-                continue
-
-            if debug:
-                print(f"{nsaetas}\t#Saetas")
 
             col_leaf = tree.GetLeaf("rpchit.fCol")
             row_leaf = tree.GetLeaf("rpchit.fRow")
             nhits = col_leaf.GetLen()
 
-            if debug:
-                trb_leaf = tree.GetLeaf("rpchit.fTrbnum")
-                print(f"{nhits}\t#Hits")
-
-                trb_nhits = 0
-                for hit in range(trb_leaf.GetLen()):
-                    plane = trb_leaf.GetValue(hit)
-                    if plane == trbnum:
-                        trb_nhits += 1
-                print(f"{trb_nhits}\t#Hits in plane {self.plane_name}")
-
             k_indices = []
             saetas_per_index = {}
             for entry in range(nsaetas):
                 k_ind = int(ind_leaf.GetValue(entry))
-                if debug:
-                    if k_ind not in k_indices:
-                        k_indices.append(k_ind)
                 if k_ind not in saetas_per_index:
                     saetas_per_index[k_ind] = 0
                 saetas_per_index[k_ind] += 1
-
-            if debug:
-                print("")
-                print(f"Hit indices in plane {self.plane_name}: {k_indices}")
-                print(f"Saetas per index: {saetas_per_index}")
-                print("\n")
 
             for hit in range(nhits):
                 if hit in saetas_per_index:
@@ -188,24 +160,56 @@ class CookDataROOT(Chef):
         # nentries = tree.GetEntries()
 
         branch = ["rpcraw", "rpchit"][1]
-
         trbnum = TRB_TAB[self.plane_name]
-        # print(f"{self.plane_name}, trbnum = {trbnum}")
-        col_branch = rnp.tree2array(tree=tree,
-                                    branches=f"{branch}.fCol",
-                                    selection=f"{branch}.fTrbnum == {trbnum}")
-        row_branch = rnp.tree2array(tree=tree,
-                                    branches=f"{branch}.fRow",
-                                    selection=f"{branch}.fTrbnum == {trbnum}")
 
-        hits, _, _ = np.histogram2d(
-            np.concatenate(row_branch),
-            np.concatenate(col_branch),
-            bins=[
-                np.arange(0.5, NROW + 1),
-                np.arange(0.5, NCOL + 1)
-            ]
-        )
+        hits = np.zeros((NROW, NCOL))
+
+        if self.check_m1:
+            nevents = tree.GetEntries()
+            for evt in range(nevents):
+                tree.GetEntry(evt)
+
+                col_leaf = tree.GetLeaf(f"{branch}.fCol")
+                row_leaf = tree.GetLeaf(f"{branch}.fRow")
+                trb_leaf = tree.GetLeaf(f"{branch}.fTrbnum")
+
+                nhits = col_leaf.GetLen()
+
+                if nhits != 3: continue
+
+                hits_topo = [0, 0, 0]
+                for k in range(nhits):
+                    trb = trb_leaf.GetValue(k)
+                    # hits_topo[int(trbnum)] = [row_leaf.GetValue(k), col_leaf.GetValue(k)]
+                    hits_topo[int(trb)] += 1
+
+                if hits_topo != [1, 1, 1]: continue
+
+                for k in range(nhits):
+                    trb = trb_leaf.GetValue(k)
+                    if trb == trbnum:
+                        hits[int(row_leaf.GetValue(k) - 1), int(col_leaf.GetValue(k) - 1)] += 1
+
+
+
+
+
+        else:
+            col_branch = rnp.tree2array(tree=tree,
+                                        branches=f"{branch}.fCol",
+                                        selection=f"{branch}.fTrbnum == {trbnum}")
+            row_branch = rnp.tree2array(tree=tree,
+                                        branches=f"{branch}.fRow",
+                                        selection=f"{branch}.fTrbnum == {trbnum}")
+
+            hits, _, _ = np.histogram2d(
+                np.concatenate(row_branch),
+                np.concatenate(col_branch),
+                bins=[
+                    np.arange(0.5, NROW + 1),
+                    np.arange(0.5, NCOL + 1)
+                ]
+            )
 
         # TODO: Representar eventos que en rpchit sólo tengain MT1 == MT3 == MT4 == 1
 
