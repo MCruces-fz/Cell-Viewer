@@ -89,74 +89,52 @@ class CellsAppROOT(CellsApp):
 
     def show_mambos(self):
 
-        # Destroy MMBOS frame if it exists
         try:
             self.frm_mmbos.destroy()
         except AttributeError:
             pass
 
-        # Show MMBOS
         self.frm_mmbos = tk.Frame(master=self.frm_options, bg=self.bg_default)
 
-        sum_mb1 = self.mambo_sum('MB1')
-        sum_mb2 = self.mambo_sum('MB2')
-        sum_mb3 = self.mambo_sum('MB3')
-        sum_mb4 = self.mambo_sum('MB4')
-        sum_all = self.mambo_sum("ALL")
         if self.chk_hz.get():
-            sum_mb1 = np.round(sum_mb1 / 30, 3)
-            sum_mb2 = np.round(sum_mb2 / 30, 3)
-            sum_mb3 = np.round(sum_mb3 / 30, 3)
-            sum_mb4 = np.round(sum_mb4 / 30, 3)
-            sum_all = np.round(sum_all / 120, 3)
+            significant = 3
+        else:
+            significant = 1
 
-        btn_mb1 = tk.Button(
-            self.frm_mmbos,
-            text=f"{sum_mb1}",
-            command=lambda n="MB1": print(n),
-            bg=self.bg_default,
-            fg=self.fg_default,
-            bd=0
-        )
-        btn_mb2 = tk.Button(
-            self.frm_mmbos,
-            text=f"{sum_mb2}",
-            command=lambda n="MB2": print(n),
-            bg=self.bg_default,
-            fg=self.fg_default,
-            bd=0
-        )
-        btn_mb3 = tk.Button(
-            self.frm_mmbos,
-            text=f"{sum_mb3}",
-            command=lambda n="MB3": print(n),
-            bg=self.bg_default,
-            fg=self.fg_default,
-            bd=0
-        )
-        btn_mb4 = tk.Button(
-            self.frm_mmbos,
-            text=f"{sum_mb4}",
-            command=lambda n="MB4": print(n),
-            bg=self.bg_default,
-            fg=self.fg_default,
-            bd=0
-        )
+        sum_mbos = np.array([
+            [self.mambo_sum('MB3'), self.mambo_sum('MB2')],
+            [self.mambo_sum('MB4'), self.mambo_sum('MB1')]
+        ])
+        mean_mbos = np.round(sum_mbos / 30, significant)
+
+        for r, row in enumerate(sum_mbos):
+            for c, sum_val in enumerate(row):
+                mean_val = mean_mbos[r, c]
+                bg_color, fg_color = self.set_button_colors(mean_val)
+                btn_mb = tk.Button(
+                    self.frm_mmbos,
+                    text=f"{mean_val}",
+                    command=lambda s=sum_val, m=mean_val: print(f"\nSum: {s}\nMean: {m:.3f}"),
+                    bg=bg_color,
+                    fg=fg_color,
+                    bd=0
+                )
+                btn_mb.grid(row=r + 1, column=c + 1, sticky="news")
+
+        sum_all = self.mambo_sum("ALL")
+        mean_all = np.round(sum_all / 120, significant)
+        bg_color, fg_color = self.set_button_colors(mean_all)
         btn_all = tk.Button(
             self.frm_mmbos,
-            text=f"{sum_all}",
-            command=lambda n="All MBs": print(n),
-            bg=self.bg_default,
-            fg=self.fg_default,
+            text=f"{mean_all}",
+            command=lambda s=sum_all, m=mean_all: print(f"Sum: {s}\nMean: {m:.3f}"),
+            bg=bg_color,
+            fg=fg_color,
             bd=0
         )
 
-        self.frm_mmbos.grid(row=1, column=4)
-        btn_mb1.grid(row=2, column=2, sticky="news")
-        btn_mb2.grid(row=1, column=2, sticky="news")
-        btn_mb3.grid(row=1, column=1, sticky="news")
-        btn_mb4.grid(row=2, column=1, sticky="news")
         btn_all.grid(row=3, column=1, columnspan=2, sticky="news")
+        self.frm_mmbos.grid(row=1, column=4)
 
     def mambo_sum(self, mambo: Union[str, int]):
         """
