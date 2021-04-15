@@ -4,19 +4,6 @@
    ---------------------------
 """
 
-# fptrucha directories:
-# ASCII_DATA_DIR = "/home/labcaf/online/png/"  # Current realtime monitoring
-
-# ASCII_DATA_DIR = "/media/Datos4TB/tragaldabas/data/monitor/png" # Full ASCII data from 2016
-# ROOT_DATA_DIR = "/media/Datos4TB/people/mcruces/ICRCDST/"
-# TRUFA_LIB_DIR = "/media/Datos2TB/mcruces/GitHub/TRAGALDABAS-fantastic-Cpp/soft_TT/"
-
-# fppercebe directories:
-ASCII_DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/png/"
-ROOT_DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/test01/cut"
-# ROOT_DATA_DIR = "/home/mcruces/Documents/fptrucha_hits/test01/nocut"
-TRUFA_LIB_DIR = "/home/mcruces/Documents/GitHub/TRUFA/"
-
 # Number of rows and columns of each detector plane
 NROW = 10
 NCOL = 12

@@ -10,7 +10,8 @@ from scipy.stats import kurtosis, skew
 from typing import List
 
 from kitchen.chef import Chef
-from utils.const import ASCII_DATA_DIR, NROW
+from utils.const import NROW
+from utils.dirs import ASCII_DATA_DIR
 
 
 class CookDataASCII(Chef):

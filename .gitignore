@@ -12,6 +12,7 @@ s*.vim
 *_debug.py
 store/*
 !store/CV-15Mar-*.png
+utils/dirs.py
 
 # Distribution / packaging
 .Python

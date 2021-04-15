@@ -6,7 +6,7 @@
 
 from interface.gui_root import CellsAppROOT
 from kitchen.cook_root import CookDataROOT
-from utils.const import ROOT_DATA_DIR
+from utils.dirs import ROOT_DATA_DIR
 
 cook_data = CookDataROOT(data_dir=ROOT_DATA_DIR)
 # ary = cook_data.read_data()

@@ -6,7 +6,7 @@
 
 from interface.gui_ascii import CellsAppASCII
 from kitchen.cook_ascii import CookDataASCII
-from utils.const import ASCII_DATA_DIR
+from utils.dirs import ASCII_DATA_DIR
 
 # TODO:
 #    - Barra de CMap a la derecha, para entender los colores
