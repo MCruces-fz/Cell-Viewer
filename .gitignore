@@ -11,7 +11,7 @@ __pycache__/
 s*.vim
 *_debug.py
 store/*
-!store/CV-15Mar-*.png
+!store/screenshot.png
 utils/dirs.py
 utils/update_files.py
 
