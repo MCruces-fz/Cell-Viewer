@@ -13,6 +13,7 @@ s*.vim
 store/*
 !store/CV-15Mar-*.png
 utils/dirs.py
+utils/update_files.py
 
 # Distribution / packaging
 .Python
