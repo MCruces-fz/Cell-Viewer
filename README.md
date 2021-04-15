@@ -6,20 +6,35 @@ Graphical User Interface to view stats about the TRASGO detectors easily.
 ## How to use
 You can check ascii files (`tryydoyhhmmss.hld_cell_entries.dat`) with `ascii_cell_viewer.py` or root files (`tryydoyhhmmss.hld.root.root`). First are faster to read and you can check the mean of hits in runs (around 25 minutes each run), with standard deviation, skewness and kurtosis; instead, reading root files you can measure a more accurate rate (in Hz).
 
-First you need to log in FPTrucha by SSH with -XY flag:
-```bash
-ssh -XY user@fptrucha.usc.es
-```
-then, check if the files you want to read exist and if they're saved in 
-```bash
-utils/const.py
-```
-as UPPERCASE constants:
+### Set working directories
+First you need to create the file `const/dirs.py` and add as UPPERCASE constants the following strings:
 ```python
-ASCII_DATA_DIR="/path/to/png/"
-# And / or:
-ROOT_DATA_DIR="/path/to/rootfiles/"
+# utils/const.py
+
+ASCII_DATA_DIR = "/path/to/png/"
+ROOT_DATA_DIR  = "/path/to/rootfiles/"
+TRUFA_LIB_DIR  = "/path/to/libtunpacker.so"
 ```
+where `ASCII_DATA_DIR` is the path to the directory where you have stored a copy from files in
+```bash
+fptrucha.usc.es:/home/labcaf/online/png/
+```
+`ROOT_DATA_DIR` is the path where you store unpacked files like:
+```bash
+tryydoyhhmmss.hld.root.root
+# or
+styydoyhhmmss.hld.root.root
+```
+and `TRUFA_LIB_DIR` is the path to the "TRUFA" compiled library.
+
+### Install dependencies
+You need to work with:
+* Python >= 3.7
+* Tkinter (`pip install tkinter`)
+* ROOT >= 6.22
+* PyROOT (for Python3)
+
+### Run the program
 
 Finally you need to execute
 ```bash
