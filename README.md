@@ -30,7 +30,7 @@ and `TRUFA_LIB_DIR` is the path to the "TRUFA" compiled library.
 ### Install dependencies
 You need to work with:
 * Python >= 3.7
-* Tkinter (`pip install tkinter`)
+* Tkinter (`pip install tk`)
 * ROOT >= 6.22
 * PyROOT (for Python3)
 
@@ -56,33 +56,32 @@ of view, when you view TRAGALDABAS from the southwest (entering the door).
 Here are the cell layouts in both cases:
 
 #### Motherboards on App:
-They are in the same disposition that they are saved in ascii files.
-
-| MB3 | MB2 |
-|-----|-----|
-| MB4 | MB1 |
-
-#### Real disposition:
-Below the table is the compass to locate you.
-
-| MB2 | MB3 |
-|-----|-----|
-| MB2 | MB4 |
-
+The Motherboard layout shown in this GUI, is the specular image of the real layout. See **Real layout**
 ```
-      N
-       \
-  ______\______ E
-W  ------\-------
-          \
-           \
-            S
-|-------------------|
-| - C O M P A S S - |
-|-------------------|
+:-----:-----:
+: MB3 : MB2 :
+:-----:-----:
+: MB4 : MB1 :
+:-----:-----:
 ```
 
+#### Real layout:
+The LabCAF is represented below with *ASCII Art*:
 ```
+                        FAN  _ W
+       :-----:-----:   ///   | I
+       : MB2 : MB3 :         | N
+       :-----:-----:         | D
+       : MB1 : MB4 :         | O
+       :-----:-----:         | W
+                             - S
+                                       N   compass
+         L a b C A F                    \
+                                    W ---\--- E
+|\                                        \
+|/ DOOR                                    S
+
+
          _______________________
        //                       \
       //       M I G U E L       \
