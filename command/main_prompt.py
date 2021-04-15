@@ -1,3 +1,8 @@
+"""
+Sources:
+    https://code-maven.com/interactive-shell-with-cmd-in-python
+    https://codeburst.io/building-beautiful-command-line-interfaces-with-python-26c7e1bb54df
+"""
 from cmd import Cmd
 
 
