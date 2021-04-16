@@ -81,7 +81,7 @@ class CellsApp:
         self.var_max_color = None
         # self.chk_m1 = None
         # self.chk_hz = None
-        self.chk_max= None
+        self.chk_max = None
 
         # L O G I C
         # Initiates first widget:
@@ -189,15 +189,17 @@ class CellsApp:
         self.inp_dt.update(from_date=self.from_date, to_date=self.to_date,
                            plane_name=self.plane_name, var_to_update=self.choice_math_val.get())
 
-        min_val, max_val = self.set_mapper()
+        self.set_mapper()
         self.draw_cells()
-        self.draw_colormap_bar(min_val, max_val)
+        self.draw_colormap_bar(*self.mapper.get_clim())  # min_val, max_val)
 
     def set_mapper(self):
         """
-        Normalize item number values to colormap
+        Normalize item number values to colormap.
+        Create a matplotlib.cm.ScalarMappable called self.mapper.
 
-        :return: Minimum and maximum values
+        (min, max) = self.mapper.get_clim()
+        color_map = self.mapper.get_cmap()
         """
         numpy_value = self.get_math_value(val=self.choice_math_val.get())
         try:
@@ -213,8 +215,6 @@ class CellsApp:
             max_val = np.max(numpy_value)
         norm = Normalize(vmin=min_val, vmax=max_val)
         self.mapper = cm.ScalarMappable(norm=norm, cmap=self.choice_cmap.get())
-
-        return min_val, max_val
 
     @staticmethod
     def grid_configure(frame: Union[tk.Frame, ttk.Frame], n_cols: int, n_rows: int,

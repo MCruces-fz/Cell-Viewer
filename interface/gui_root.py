@@ -6,7 +6,9 @@ from utils.const import NCOL, NROW
 
 import numpy as np
 import datetime
+import matplotlib.pyplot as plt
 from typing import Union
+from os.path import join as join_path
 
 
 class CellsAppROOT(CellsApp):
@@ -65,7 +67,7 @@ class CellsAppROOT(CellsApp):
         spx_hour_to.grid(row=2, column=2)
         spx_mins_to.grid(row=2, column=3)
 
-        # CHEKS
+        # CHECKS
         # Max value to color
         self.chk_max = tk.BooleanVar(master=self.frm_choices)
         chk_mx = tk.Checkbutton(self.frm_choices, text="Max: ", variable=self.chk_max,
@@ -86,6 +88,44 @@ class CellsAppROOT(CellsApp):
         chk_hertz = tk.Checkbutton(self.frm_choices, text="Rate (Hz)", variable=self.chk_hz,
                                    bg=self.bg_default, fg=self.fg_default, selectcolor=self.bg_default)
         chk_hertz.grid(row=5, column=3)
+
+        # SAVE BUTTON
+        btn_save = tk.Button(master=self.window, text="SAVE",
+                             command=self.save_state_png,
+                             bg=self.bg_default, fg=self.fg_default,
+                             bd=0)
+        # btn_save.grid(row=3, rowspan=2, column=4, columnspan=3)
+        btn_save.pack()
+
+    def save_state_png(self):
+        # TODO: Create a class to plot and call it from any other class
+
+        storage_dir = "store/saves/"
+        filename = f"fromdate-todate-planename-branch-{np.random.random() * 100:.0f}"
+        title = f"{storage_dir}, plane: {self.plane_name}, branch: {self.inp_dt.current_var}"
+
+        fig, (cells, cmap) = plt.subplots(
+            ncols=2,
+            figsize=(14, 10),
+            gridspec_kw={
+                "width_ratios": [12, 1]
+            }
+        )
+
+        c_min, c_max = self.mapper.get_clim()
+        im = cells.matshow(
+            self.inp_dt.plane_event,
+            interpolation=None,
+            aspect='auto',
+            cmap=self.mapper.get_cmap(),
+            vmin=c_min, vmax=c_max,
+        )
+
+        cells.set_title(title)
+        # ax1.set_ylabel('Blah2')
+        fig.colorbar(im, cmap)
+
+        fig.savefig(f"{join_path(storage_dir, filename)}.png")
 
     def show_mambos(self):
 
