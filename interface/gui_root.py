@@ -1,6 +1,7 @@
 from interface.parent_gui import CellsApp
 from kitchen.cook_root import CookDataROOT
 from kitchen.chef import Chef
+# from figmap.cellmap import Cellmap as cellm
 from utils.tkinter_modules import tk
 from utils.const import NCOL, NROW
 
@@ -90,10 +91,13 @@ class CellsAppROOT(CellsApp):
         chk_hertz.grid(row=5, column=3)
 
         # SAVE BUTTON
-        btn_save = tk.Button(master=self.window, text="SAVE",
-                             command=self.save_state_png,
-                             bg=self.bg_default, fg=self.fg_default,
-                             bd=0)
+        btn_save = tk.Button(
+            master=self.window, text="SAVE",
+            command=self.save_state_png,
+            # command=lambda a=self.inp_dt, b=self.mapper, c=self.plane_name: cellm.save(a, b, c),
+            bg=self.bg_default, fg=self.fg_default,
+            bd=0
+        )
         # btn_save.grid(row=3, rowspan=2, column=4, columnspan=3)
         btn_save.pack()
 
@@ -108,9 +112,10 @@ class CellsAppROOT(CellsApp):
             ncols=2,
             figsize=(14, 10),
             gridspec_kw={
-                "width_ratios": [12, 1]
+                "width_ratios": [15, 1]
             }
         )
+        fig.tight_layout()
 
         c_min, c_max = self.mapper.get_clim()
         im = cells.matshow(
@@ -121,11 +126,16 @@ class CellsAppROOT(CellsApp):
             vmin=c_min, vmax=c_max,
         )
 
+        # TODO:
+        #  - Make this as outer class which takes "self" parameter (CellsAppROOT class) and CookDataROOT class.
+        #  - Print values in matshow, with inverse colors.
+        #  - Create function to get inverse of a color ('cause it's used in two places) and those shits.
+
         cells.set_title(title)
         # ax1.set_ylabel('Blah2')
         fig.colorbar(im, cmap)
 
-        fig.savefig(f"{join_path(storage_dir, filename)}.png")
+        fig.savefig(f"{join_path(storage_dir, filename)}.png", bbox_inches='tight')
 
     def show_mambos(self):
 
