@@ -1,3 +1,9 @@
+"""
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+"""
+
 from interface.parent_gui import CellsApp
 from kitchen.cook_root import CookDataROOT
 from kitchen.chef import Chef

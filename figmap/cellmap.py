@@ -1,3 +1,10 @@
+"""
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+"""
+
 from kitchen.cook_root import CookDataROOT
 
 import numpy as np

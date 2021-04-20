@@ -1,4 +1,8 @@
 """
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
 Sources:
     https://code-maven.com/interactive-shell-with-cmd-in-python
     https://codeburst.io/building-beautiful-command-line-interfaces-with-python-26c7e1bb54df
