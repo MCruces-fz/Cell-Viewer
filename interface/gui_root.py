@@ -2,6 +2,11 @@
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
+
+Author: Miguel Cruces Fernández
+e-mail:
+  - miguel.cruces.fernandez@usc.es
+  - mcsquared.fz@gmail.com
 """
 
 from interface.parent_gui import CellsApp
@@ -108,8 +113,6 @@ class CellsAppROOT(CellsApp):
         btn_save.pack()
 
     def save_state_png(self):
-        # TODO: Create a class to plot and call it from any other class
-
         storage_dir = "store/saves/"
         filename = f"fromdate-todate-planename-branch-{np.random.random() * 100:.0f}"
         title = f"{storage_dir}, plane: {self.plane_name}, branch: {self.inp_dt.current_var}"

@@ -3,6 +3,11 @@
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
+Author: Miguel Cruces Fernández
+e-mail:
+  - miguel.cruces.fernandez@usc.es
+  - mcsquared.fz@gmail.com
+
 Sources:
     https://code-maven.com/interactive-shell-with-cmd-in-python
     https://codeburst.io/building-beautiful-command-line-interfaces-with-python-26c7e1bb54df

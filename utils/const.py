@@ -3,6 +3,11 @@
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
+Author: Miguel Cruces Fernández
+e-mail:
+  - miguel.cruces.fernandez@usc.es
+  - mcsquared.fz@gmail.com
+
    ---------------------------
    C O N S T A N T S   F I L E
    ---------------------------

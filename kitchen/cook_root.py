@@ -3,37 +3,10 @@
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
-@author: MCruces
-
-    # rdf = RDataFrame(tree)
-    # # rpc_hit = rdf.GetLeaf("rpchit.fX")
-    # # IMPORTANT
-    # # https://www.reddit.com/r/learnpython/comments/7ivlid/translation_from_root_to_pyroot/
-    # # https://pastebin.com/8ixEe34h
-    # # https://root-forum.cern.ch/t/no-ttree-asmatrix-and-rdataframe-in-experimental-pyroot/36184
-    # # https://root.cern/doc/master/pyroot002__TTreeAsMatrix_8py.html
-    # # ary = rpc_hit.AsMatrix()
-    # ary = rdf.AsNumpy()
-    # print(ary)
-
-    # # ??
-    # gStyle.SetOptStat(1000000001)
-
-    # # Create TCanvas:
-    # #    This is the window TCanvas("c", "c", width, height)
-    # # https://root.cern.ch/root/html532/TCanvas.html
-    # can = TCanvas("can", "can", 1100, 700)
-
-    # # Divide the canvas in 3 columns and 2 rows
-    # can.Divide(3, 2, 0.01, 0.01)
-
-    # # Draw this in the first TPad of the can TCanvas
-    # can.cd(1)
-    # can.Draw("rpcraw.fRow-1:rpcraw.fCol-1>>T1(12,0,12,10,0,10)",
-    #          "rpcraw.fTrbnum==2", "colz text")
-    # can.cd(2)
-    # can.Draw("rpcraw.fRow-1:rpcraw.fCol-1>>T3(12,0,12,10,0,10)",
-    #          "rpcraw.fTrbnum==0", "colz text")
+Author: Miguel Cruces Fernández
+e-mail:
+  - miguel.cruces.fernandez@usc.es
+  - mcsquared.fz@gmail.com
 """
 
 # import datetime
