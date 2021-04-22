@@ -38,12 +38,9 @@ You need to work with:
 
 Finally you need to execute
 ```bash
-python3 ascii_cell_viewer.py
+python3 main.py
 ```
-to read ascii files, or
-```bash
-python3 root_cell_viewer.py
-```
+and type `help` to learn how to use.
 
 I hope FPTrucha is not too busy, otherwise it will take him a bit to start the GUI...
 
