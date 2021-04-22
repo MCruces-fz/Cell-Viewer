@@ -12,15 +12,15 @@ e-mail:
 from interface.parent_gui import CellsApp
 from kitchen.cook_root import CookDataROOT
 from kitchen.chef import Chef
-# from figmap.cellmap import Cellmap as cellm
+from figmap.cellmap import Cellmap
 from utils.tkinter_modules import tk
 from utils.const import NCOL, NROW
 
 import numpy as np
 import datetime
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from typing import Union
-from os.path import join as join_path
+# from os.path import join as join_path
 
 
 class CellsAppROOT(CellsApp):
@@ -33,6 +33,8 @@ class CellsAppROOT(CellsApp):
         self.var_hour_to = None
         self.var_mins_to = None
         self.var_max_color = None
+
+        self.cell_map = None
 
     def set_spinbox(self, master: object, var: object, f: int = 0, t: int = 1):
         """
@@ -105,46 +107,25 @@ class CellsAppROOT(CellsApp):
         btn_save = tk.Button(
             master=self.window, text="SAVE",
             command=self.save_state_png,
-            # command=lambda a=self.inp_dt, b=self.mapper, c=self.plane_name: cellm.save(a, b, c),
             bg=self.bg_default, fg=self.fg_default,
             bd=0
         )
-        # btn_save.grid(row=3, rowspan=2, column=4, columnspan=3)
         btn_save.pack()
 
     def save_state_png(self):
-        storage_dir = "store/saves/"
-        filename = f"fromdate-todate-planename-branch-{np.random.random() * 100:.0f}"
-        title = f"{storage_dir}, plane: {self.plane_name}, branch: {self.inp_dt.current_var}"
 
-        fig, (cells, cmap) = plt.subplots(
-            ncols=2,
-            figsize=(14, 10),
-            gridspec_kw={
-                "width_ratios": [15, 1]
-            }
+        self.cellmap.update(
+            cooked=self.inp_dt,
+            plane_name=self.plane_name,
+            hz=self.chk_hz.get()
         )
-        fig.tight_layout()
-
-        c_min, c_max = self.mapper.get_clim()
-        im = cells.matshow(
-            self.inp_dt.plane_event,
-            interpolation=None,
-            aspect='auto',
-            cmap=self.mapper.get_cmap(),
-            vmin=c_min, vmax=c_max,
+        self.cellmap.set_mapper(
+            set_max=self.chk_max.get(),
+            max_val=self.var_max_color.get(),
+            cmap_name=self.choice_cmap.get()
         )
 
-        # TODO:
-        #  - Make this as outer class which takes "self" parameter (CellsAppROOT class) and CookDataROOT class.
-        #  - Print values in matshow, with inverse colors.
-        #  - Create function to get inverse of a color ('cause it's used in two places) and those shits.
-
-        cells.set_title(title)
-        # ax1.set_ylabel('Blah2')
-        fig.colorbar(im, cmap)
-
-        fig.savefig(f"{join_path(storage_dir, filename)}.png", bbox_inches='tight')
+        self.cellmap.save_file(ext="png")
 
     def show_mambos(self):
 
@@ -169,7 +150,7 @@ class CellsAppROOT(CellsApp):
         for r, row in enumerate(sum_mbos):
             for c, sum_val in enumerate(row):
                 mean_val = mean_mbos[r, c]
-                bg_color, fg_color = self.set_button_colors(mean_val)
+                bg_color, fg_color = self.cellmap.set_value_color(mean_val)
                 btn_mb = tk.Button(
                     self.frm_mmbos,
                     text=f"{mean_val}",
@@ -182,7 +163,7 @@ class CellsAppROOT(CellsApp):
 
         sum_all = self.mambo_sum("ALL")
         mean_all = np.round(sum_all / 120, significant)
-        bg_color, fg_color = self.set_button_colors(mean_all)
+        bg_color, fg_color = self.cellmap.set_value_color(mean_all)
         btn_all = tk.Button(
             self.frm_mmbos,
             text=f"{mean_all}",
