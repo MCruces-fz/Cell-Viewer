@@ -40,7 +40,14 @@ Finally you need to execute
 ```bash
 python3 main.py
 ```
-and type `help` to learn how to use.
+and in the `(Cmd)` prompt write one of these commands:
+```
+HELP: (commands)
+- root
+Launch the GUI to read .hld.root.root files (in ROOT_DATA_DIR)
+- ascii
+Launch the GUI to read .txt files (in ASCII_DATA_DIR)
+```
 
 I hope FPTrucha is not too busy, otherwise it will take him a bit to start the GUI...
 
