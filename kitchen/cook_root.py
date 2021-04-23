@@ -47,7 +47,7 @@ class CookDataROOT(Chef):
         self.last_check_m1 = False
         self.last_check_hz = False
 
-        self.used_filenames = None
+        self.used_filenames = []
 
     def read_data(self) -> np.array:
         """
@@ -78,7 +78,6 @@ class CookDataROOT(Chef):
                     self.get_rpc_saeta_array(join_path(self.main_data_dir, filename))
                 elif self.current_var in ["RAW", "HIT"]:
                     self.get_raw_hits_array(join_path(self.main_data_dir, filename))
-                self.used_filenames.append(basename(filename, extension=False))
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
         print("100%\tdone")
 
@@ -89,6 +88,11 @@ class CookDataROOT(Chef):
 
         :param full_path: full path to the root file.
         """
+
+        if self.plane_event is None:
+            self.plane_event = np.zeros((NROW, NCOL), dtype=np.uint32)
+
+        self.used_filenames.append(basename(full_path, extension=False))
 
         # Read TTree
         file0 = TFile(full_path, "READ")
@@ -133,6 +137,12 @@ class CookDataROOT(Chef):
 
         :param full_path: full path to the root file.
         """
+
+        if self.plane_event is None:
+            self.plane_event = np.zeros((NROW, NCOL), dtype=np.uint32)
+
+        self.used_filenames.append(basename(full_path, extension=False))
+
         # Read TTree
         file0 = TFile(full_path, "READ")
         tree = file0.Get("T")

@@ -29,7 +29,6 @@ class Cellmap:
         # , cooked: CookDataROOT, plane_name: str,
         # save: bool = True, show: bool = False):
 
-        self.plane_name = None
         self._mapper = None
         self.cooked = None
         self.save_cm = True
@@ -53,10 +52,10 @@ class Cellmap:
             files_str = f"{self.cooked.used_filenames[0]}"
 
         self.filename = f"{files_str}-"\
-                        f"{self.plane_name}-"\
+                        f"{self.cooked.plane_name}-"\
                         f"{self.cooked.current_var}"
 
-        title = f"Plane: {self.plane_name}, Branch: {self.cooked.current_var}\n"\
+        title = f"Plane: {self.cooked.plane_name}, Branch: {self.cooked.current_var}\n"\
                 f"Files: {files_str}"
 
         self.fig, (cells, cmap) = plt.subplots(
@@ -147,21 +146,23 @@ class Cellmap:
 
         return bg_color, fg_color
 
-    def save_file(self, ext: str = "png", create: bool = True):
-        if create:
+    def save_file(self, out_path: str = None, ext: str = "png", re_create: bool = True, label: str = ""):
+        if re_create:
             self.create()
 
         if ext.startswith("."):
             ext = ext[1:]
 
+        if out_path is None:
+            out_path = self.storage_dir
+
         self.fig.savefig(
-            f"{join_path(self.storage_dir, self.filename)}.{ext}",
+            f"{join_path(out_path, self.filename)}.{ext}",
             bbox_inches='tight'
         )
 
-    def update(self, cooked: CookDataROOT, plane_name: str,
-               save: bool = True, show: bool = False, hz: bool = False):
-        self.plane_name = plane_name
+    def update(self, cooked: CookDataROOT, save: bool = True,
+               show: bool = False, hz: bool = False):
         self.cooked = cooked
         self.save_cm = save
         self.show_cm = show

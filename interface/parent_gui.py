@@ -194,7 +194,6 @@ class CellsApp:
 
         self.cellmap.update(
             cooked=self.inp_dt,
-            plane_name=self.plane_name
         )
         self.cellmap.set_mapper(
             set_max=self.chk_max.get(),

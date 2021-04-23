@@ -116,7 +116,6 @@ class CellsAppROOT(CellsApp):
 
         self.cellmap.update(
             cooked=self.inp_dt,
-            plane_name=self.plane_name,
             hz=self.chk_hz.get()
         )
         self.cellmap.set_mapper(
