@@ -7,7 +7,7 @@ Graphical User Interface to view stats about the TRASGO detectors easily.
 You can check ascii files (`tryydoyhhmmss.hld_cell_entries.dat`) with `ascii_cell_viewer.py` or root files (`tryydoyhhmmss.hld.root.root`). First are faster to read and you can check the mean of hits in runs (around 25 minutes each run), with standard deviation, skewness and kurtosis; instead, reading root files you can measure a more accurate rate (in Hz).
 
 ### Set working directories
-First you need to create the file `const/dirs.py` and add as UPPERCASE constants the following strings:
+First you need to create the file `utils/dirs.py` and add as UPPERCASE constants the following strings:
 ```python
 # utils/const.py
 
@@ -36,11 +36,11 @@ You need to work with:
 
 ### Run the program
 
-Finally you need to execute
+Finally you need to execute with Python 3
 ```bash
-python3 main.py
+python main.py
 ```
-and in the `(Cmd)` prompt write one of these commands:
+and once the prompt is launched, write one of these commands:
 ```
 HELP: (commands)
 - root
@@ -48,8 +48,7 @@ Launch the GUI to read .hld.root.root files (in ROOT_DATA_DIR)
 - ascii
 Launch the GUI to read .txt files (in ASCII_DATA_DIR)
 ```
-
-I hope FPTrucha is not too busy, otherwise it will take him a bit to start the GUI...
+or `help <command>` to get information about such `<command>`.
 
 
 ## Motherboard disposition
