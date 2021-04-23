@@ -15,6 +15,7 @@ import os
 from os.path import join as join_path
 from utils.const import NROW, NCOL, TRB_TAB
 from utils.dirs import ROOT_DATA_DIR, TRUFA_LIB_DIR
+from utils.footilities import basename
 from kitchen.chef import Chef
 import root_numpy as rnp
 from ROOT import gROOT, gSystem, TFile, kTRUE  # , TCanvas, RDataFrame, gStyle
@@ -46,6 +47,8 @@ class CookDataROOT(Chef):
         self.last_check_m1 = False
         self.last_check_hz = False
 
+        self.used_filenames = None
+
     def read_data(self) -> np.array:
         """
         Redefinition of Chef.read_data() method to read data from
@@ -65,6 +68,7 @@ class CookDataROOT(Chef):
 
         # Clear Data
         self.plane_event = np.zeros((NROW, NCOL), dtype=np.uint32)
+        self.used_filenames = []
 
         for filename in sorted(os.listdir(ROOT_DATA_DIR)):
             if not filename.startswith(('tr', 'st')) or not filename.endswith('.root'): continue
@@ -74,6 +78,7 @@ class CookDataROOT(Chef):
                     self.get_rpc_saeta_array(join_path(self.main_data_dir, filename))
                 elif self.current_var in ["RAW", "HIT"]:
                     self.get_raw_hits_array(join_path(self.main_data_dir, filename))
+                self.used_filenames.append(basename(filename, extension=False))
                 print(f"{(tstamp_file - tstamp_from) / (tstamp_to - tstamp_from) * 100 :.2f}%\tdone")
         print("100%\tdone")
 

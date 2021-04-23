@@ -36,7 +36,7 @@ class Cellmap:
         self.show_cm = False
         self.hz = False
 
-        self.filename = f"fromdate-todate-planename-branch-{np.random.random() * 100:.0f}"
+        self.filename = None
 
     @property
     def mapper(self):
@@ -47,7 +47,17 @@ class Cellmap:
         self._mapper = mapper
 
     def create(self):
-        title = f"Plane: {self.plane_name}, Branch: {self.cooked.current_var}"
+        if len(self.cooked.used_filenames) > 1:
+            files_str = f"{self.cooked.used_filenames[0]}-{self.cooked.used_filenames[-1]}"
+        else:
+            files_str = f"{self.cooked.used_filenames[0]}"
+
+        self.filename = f"{files_str}-"\
+                        f"{self.plane_name}-"\
+                        f"{self.cooked.current_var}"
+
+        title = f"Plane: {self.plane_name}, Branch: {self.cooked.current_var}\n"\
+                f"Files: {files_str}"
 
         self.fig, (cells, cmap) = plt.subplots(
             ncols=2,
@@ -75,10 +85,10 @@ class Cellmap:
         for (i, j), z in np.ndenumerate(self.cooked.plane_event):
             if not self.hz:
                 txt = f"{z}"
-                if z > 1:
-                    font_size = 36 / cipher(z)
+                if z >= 1e2:
+                    font_size = 32 / cipher(z)
                 else:
-                    font_size = 18
+                    font_size = 12
             else:
                 txt = f"{z:.3f}"
                 font_size = 9
