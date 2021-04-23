@@ -46,9 +46,16 @@ HELP: (commands)
 - root
 Launch the GUI to read .hld.root.root files (in ROOT_DATA_DIR)
 - ascii
-Launch the GUI to read .txt files (in ASCII_DATA_DIR)
+Launch the GUI to read .dat files (in ASCII_DATA_DIR)
 ```
 or `help <command>` to get information about such `<command>`.
+
+### Use the Graphical User Interface
+
+Choose date and time. Then you can choose another specifications (they are optional) and hit "Ok" button.
+Each time you change something, you need to hit "Ok" again to update the map. 
+When you are glad about the result, you can hit "SAVE" button to get the result in png format.
+It will be saved in *store/saves/filename.png*
 
 
 ## Motherboard disposition
