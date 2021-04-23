@@ -58,7 +58,7 @@ When you are glad about the result, you can hit "SAVE" button to get the result 
 It will be saved in *store/saves/filename.png*
 
 
-## Motherboard disposition
+## Motherboard layout
 
 ### TRAGALDABAS
 The motherboards are not in the same location as from the normal point 
