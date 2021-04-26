@@ -11,6 +11,8 @@ __pycache__/
 s*.vim
 *_debug.py
 
+command/settings.json
+
 store/*
 !store/screenshot.png
 !store/saves/
