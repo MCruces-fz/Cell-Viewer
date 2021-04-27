@@ -1,0 +1,33 @@
+      ____     _ _    __     ___                        
+     / ___|___| | |   \ \   / (_) _____      _____ _ __ 
+    | |   / _ \ | |____\ \ / /| |/ _ \ \ /\ / / _ \ '__|
+    | |__|  __/ | |_____\ V / | |  __/\ V  V /  __/ |   
+     \____\___|_|_|      \_/  |_|\___| \_/\_/ \___|_|   
+    
+   
+                A P A C H E   L I C E N S E
+                      ------------- 
+                 Version 2.0, January 2004
+   
+          Copyright 2021 Miguel Cruces Fernández
+   
+              miguel.cruces.fernandez@usc.es
+                  mcsquared.fz@gmail.com
+   
+
+
+  This product includes software developed in the particle 
+physics department of the University of Santiago de Compostela
+(https://www.usc.gal/es), in the Trasgo Group, dedicated to
+reseach in Cosmic Rays.
+
+  ROOT libraries used in this software are licensed under the 
+LGPL (ROOT libraries of Cern), and the others are Python's own 
+libraries.
+
+  All this code doesn't use files with other licenses and it 
+is written from scratch by the author. It belongs to the Trasgo
+Group and it can be freely distributed and modified following 
+the Apache License Version 2.0.
+
+© 2021 GitHub, Inc.
