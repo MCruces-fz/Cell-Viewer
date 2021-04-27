@@ -141,7 +141,7 @@ class CellsApp:
         opt_plane_name.config(bg=self.bg_default, fg=self.fg_default, bd=0)
 
         # CHOOSE VARIABLE TO SHOW
-        lbl_var_color = tk.Label(master=self.frm_choices, text="Show data:",
+        lbl_var_color = tk.Label(master=self.frm_choices, text="Branch:",
                                  bg=self.bg_default, fg=self.fg_default)
         option_list_var = self.inp_dt.option_list_var
         self.choice_math_val = tk.StringVar(master=self.frm_choices)
@@ -178,14 +178,14 @@ class CellsApp:
         self.cal_to.grid(row=2, column=1)
 
         self.frm_choices.grid(row=1, column=3)
-        lbl_plane.grid(row=1, column=1)
-        opt_plane_name.grid(row=2, column=1, rowspan=2)
+        lbl_plane.grid(row=1, column=1, sticky="e")
+        opt_plane_name.grid(row=1, column=2, sticky="w")  # , rowspan=2)
 
-        lbl_cmap.grid(row=1, column=2)  # (row=0, column=4)
-        opt_variable_cmap.grid(row=2, column=2, rowspan=2)
+        lbl_cmap.grid(row=4, column=1, sticky="e")  # (row=0, column=4)
+        opt_variable_cmap.grid(row=4, column=2, rowspan=2, sticky="w")
 
-        lbl_var_color.grid(row=1, column=3)
-        opt_variable_color.grid(row=2, column=3, rowspan=2)
+        lbl_var_color.grid(row=2, column=1, rowspan=2, sticky="e")
+        opt_variable_color.grid(row=2, column=2, rowspan=2, sticky="w")
 
         btn_draw.grid(row=3, rowspan=2, column=1, columnspan=3)
 

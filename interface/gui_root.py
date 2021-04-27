@@ -102,19 +102,19 @@ class CellsAppROOT(CellsApp):
         self.var_max_color = tk.StringVar(master=self.frm_choices, value="0.8")
         ent_max = tk.Entry(master=self.frm_choices, textvariable=self.var_max_color,
                            bg=self.bg_default, fg=self.fg_default, width=7)
-        chk_mx.grid(row=4, column=1)
-        ent_max.grid(row=4, column=2)
+        chk_mx.grid(row=4, column=3)
+        ent_max.grid(row=4, column=4)
 
         # Other checks
         self.chk_m1 = tk.BooleanVar(master=self.frm_choices)
         chk_multi = tk.Checkbutton(self.frm_choices, text="M1 only", variable=self.chk_m1,
                                    bg=self.bg_default, fg=self.fg_default, selectcolor=self.bg_default)
-        chk_multi.grid(row=4, column=3)
+        chk_multi.grid(row=2, column=3, columnspan=2, sticky="w")
 
         self.chk_hz = tk.BooleanVar(master=self.frm_choices)
         chk_hertz = tk.Checkbutton(self.frm_choices, text="Rate (Hz)", variable=self.chk_hz,
                                    bg=self.bg_default, fg=self.fg_default, selectcolor=self.bg_default)
-        chk_hertz.grid(row=5, column=3)
+        chk_hertz.grid(row=3, column=3, columnspan=2, sticky="w")
 
         # SAVE BUTTON
         btn_save = tk.Button(
@@ -179,7 +179,7 @@ class CellsAppROOT(CellsApp):
         btn_all = tk.Button(
             self.frm_mmbos,
             text=f"{mean_all}",
-            command=lambda s=sum_all, m=mean_all: print(f"Sum: {s}\nMean: {m:.3f}"),
+            command=lambda s=sum_all, m=mean_all: print(f"\nSum: {s}\nMean: {m:.3f}"),
             bg=bg_color,
             fg=fg_color,
             bd=0
