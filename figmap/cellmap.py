@@ -39,8 +39,6 @@ class Cellmap:
     fig = None
 
     def __init__(self):
-        # , cooked: CookDataROOT, plane_name: str,
-        # save: bool = True, show: bool = False):
 
         self._mapper = None
         self.cooked = None
@@ -50,15 +48,43 @@ class Cellmap:
 
         self.filename = None
 
+    def update(self, cooked: CookDataROOT, save: bool = True,
+               show: bool = False, hz: bool = False):
+        """
+        Update the current cell map
+
+        :param cooked: Cooked data from an instnce of a class that inherits from Chef.
+        :param save: True (default) to save_cm the file, False to skip.
+        :param show: True to show_cm cellmap, False (default) to not.
+        :param hz: True to show cellmap in Hz units, False (default) to show it
+            in default units (number of counts).
+        """
+        self.cooked = cooked
+        self.save_cm = save
+        self.show_cm = show
+        self.hz = hz
+
+        if self._mapper is None:
+            self.set_mapper()
+
     @property
     def mapper(self):
+        """
+        Mapper Getter
+        """
         return self._mapper
 
     @mapper.setter
     def mapper(self, mapper: cm.ScalarMappable):
+        """
+        Mapper setter
+        """
         self._mapper = mapper
 
     def create(self):
+        """
+        Create the Cellmap
+        """
         if len(self.cooked.used_filenames) > 1:
             files_str = f"{self.cooked.used_filenames[0]}-{self.cooked.used_filenames[-1]}"
         else:
@@ -80,7 +106,6 @@ class Cellmap:
         )
         self.fig.tight_layout()
         cells.axis("off")
-        # cmap.tick_params(labelrotation=315)
         cmap.tick_params(labelrotation=270)
 
         c_min, c_max = self.mapper.get_clim()
@@ -115,7 +140,6 @@ class Cellmap:
             )
 
         cells.set_title(title)
-        # ax1.set_ylabel('Blah2')
         self.fig.colorbar(im, cmap)
 
     def set_mapper(self, set_max: bool = False, max_val: float = 0.8, cmap_name: str = "jet"):
@@ -125,6 +149,12 @@ class Cellmap:
 
         (min, max) = self.mapper.get_clim()
         color_map = self.mapper.get_cmap()
+
+        :param set_max: True to set a maximum value in color map, False (default) to
+            calculate maximum automatically.
+        :param max_val: If set_max=True, max_val is the maximum value to set maximum
+            color in cellmap.
+        :param cmap_name: Name of the Color Map Gradient.
         """
         numpy_value = self.cooked.plane_event
         try:
@@ -160,6 +190,15 @@ class Cellmap:
         return bg_color, fg_color
 
     def save_file(self, out_path: str = None, ext: str = "png", re_create: bool = True, label: str = ""):
+        """
+        Save the created figure.
+
+        :param out_path: Path to to the directory to save the file.
+        :param ext: Extension of the output file.
+        :param re_create: True to create the figure again (default), False to use de previous
+            calculated figure. If any figure exists, it will raise an error.
+        :param label: Label to the end of the filename (optional).
+        """
         if re_create:
             self.create()
 
@@ -170,39 +209,6 @@ class Cellmap:
             out_path = self.storage_dir
 
         self.fig.savefig(
-            f"{join_path(out_path, self.filename)}.{ext}",
+            f"{join_path(out_path, self.filename)}{label}.{ext}",
             bbox_inches='tight'
         )
-
-    def update(self, cooked: CookDataROOT, save: bool = True,
-               show: bool = False, hz: bool = False):
-        self.cooked = cooked
-        self.save_cm = save
-        self.show_cm = show
-        self.hz = hz
-
-        if self._mapper is None:
-            self.set_mapper()
-
-        self.filename = f"fromdate-todate-planename-branch-{np.random.random() * 100:.0f}"
-
-    @classmethod
-    def execute(cls, cooked: CookDataROOT, mapper: cm.ScalarMappable, plane_name: str,
-                save: bool = True, show: bool = False):
-        """
-        Save the current cell map
-
-        :param cooked: Cooked data from an instnce of a class that inherits from Chef.
-        :param mapper: Color map object created in an instance of a class that inherits from CellsApp.
-        :param plane_name: Name of the plane to analyze, i.e. "T1", "T3", "T4".
-        :param save: True (default) to save_cm the file, False to skip.
-        :param show: True to show_cm cellmap, False (default) to not.
-        """
-        cellmap = cls(cooked, mapper, plane_name)
-        cellmap.create()
-
-        if save:
-            cellmap.save_file("png")
-        if show:
-            # FIXME: It Doesn't work...
-            cellmap.fig.show()
