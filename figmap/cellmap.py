@@ -85,6 +85,7 @@ class Cellmap:
         """
         Create the Cellmap
         """
+        # Title and Filename:
         if len(self.cooked.used_filenames) > 1:
             files_str = f"{self.cooked.used_filenames[0]}-{self.cooked.used_filenames[-1]}"
         else:
@@ -97,6 +98,7 @@ class Cellmap:
         title = f"Plane: {self.cooked.plane_name}, Branch: {self.cooked.current_var}\n"\
                 f"Files: {files_str}"
 
+        # Create Figure:
         self.fig, (cells, cmap) = plt.subplots(
             ncols=2,
             figsize=(7, 5),
@@ -105,18 +107,8 @@ class Cellmap:
             }
         )
         self.fig.tight_layout()
-        cells.axis("off")
-        cmap.tick_params(labelrotation=270)
 
-        c_min, c_max = self.mapper.get_clim()
-        im = cells.matshow(
-            self.cooked.plane_event,
-            interpolation=None,
-            aspect='auto',
-            cmap=self.mapper.get_cmap(),
-            vmin=c_min, vmax=c_max,
-        )
-
+        # Cellmap:
         cipher = lambda n: int(np.log10(n) + 1)
 
         for (i, j), z in np.ndenumerate(self.cooked.plane_event):
@@ -139,7 +131,23 @@ class Cellmap:
                 color=foreground
             )
 
+        cells.plot([5.5, 5.5], [-0.5, 9.5], "#ffffff")
+        cells.plot([-0.5, 11.5], [4.5, 4.5], "#ffffff")
+
+        cells.axis("off")
         cells.set_title(title)
+
+        # Color map bar:
+        c_min, c_max = self.mapper.get_clim()
+        im = cells.matshow(
+            self.cooked.plane_event,
+            interpolation=None,
+            aspect='auto',
+            cmap=self.mapper.get_cmap(),
+            vmin=c_min, vmax=c_max,
+        )
+
+        cmap.tick_params(labelrotation=270)
         self.fig.colorbar(im, cmap)
 
     def set_mapper(self, set_max: bool = False, max_val: float = 0.8, cmap_name: str = "jet"):
