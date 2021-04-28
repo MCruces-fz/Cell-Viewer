@@ -28,19 +28,28 @@ from utils.const import FILE_PLANE
 
 # import argparse
 from os.path import join as join_path
+import warnings
 
 cooked = CookDataROOT()
 cellmap = Cellmap()
 
+# file_path = join_path(
+#     "/home/mcruces/Documents/fptrucha_hits/selftrigger/ST088/",
+#     "st21105115619.hld.root.root"
+# )
 file_path = join_path(
-    "/home/mcruces/Documents/fptrucha_hits/selftrigger/ST088/",
-    "st21105115619.hld.root.root"
+    "/home/mcruces/Documents/fptrucha_hits/test/",
+    "tr21117100312.hld.root.root"
 )
 
 cooked.current_var = "RAW"
 cooked.check_m1 = False
 cooked.check_hz = False
-cooked.plane_name = FILE_PLANE[file_path.split("/")[-2]]
+try:
+    cooked.plane_name = FILE_PLANE[file_path.split("/")[-2]]
+except KeyError:
+    warnings.warn("Using plane T1 'cause we can't find TRB name in path.")
+    cooked.plane_name = "T1"
 
 cooked.get_raw_hits_array(file_path)
 
