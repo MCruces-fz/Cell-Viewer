@@ -30,18 +30,21 @@ import os
 class Prompt(Cmd):
     prompt = '(~ºuº)~ '
     intro = ("\n"
-             "      ____     _ _    __     ___                        \n"
-             "     / ___|___| | |   \ \   / (_) _____      _____ _ __ \n"
-             "    | |   / _ \ | |____\ \ / /| |/ _ \ \ /\ / / _ \ '__|\n"
-             "    | |__|  __/ | |_____\ V / | |  __/\ V  V /  __/ |   \n"
-             "     \____\___|_|_|      \_/  |_|\___| \_/\_/ \___|_|   \n"
-             "    \n\n"
-             "       Cell-Viewer is open and freely distributable\n"
-             "       https://github.com/MCruces-fz/Cell-Viewer.git\n"
+             "             ____     _ _    __     ___                        \n"
+             "            / ___|___| | |   \ \   / (_) _____      _____ _ __ \n"
+             "           | |   / _ \ | |____\ \ / /| |/ _ \ \ /\ / / _ \ '__|\n"
+             "           | |__|  __/ | |_____\ V / | |  __/\ V  V /  __/ |   \n"
+             "            \____\___|_|_|      \_/  |_|\___| \_/\_/ \___|_|   \n"
+             "           \n\n"
+             "              Cell-Viewer is open and freely distributable\n"
+             "              https://github.com/MCruces-fz/Cell-Viewer.git\n"
              "    \n\n"
              "    type   ? / help                    if you are new!\n"
-             "    type   help <command>              for help with any <command>\n"
-             "    type   :q / .q / q / x / exit      to exit\n")
+             "    type   root                        to launch the GUI for ROOT  files.\n"
+             "    type   ascii                       to launch the GUI for ASCII files.\n"
+             "    type   theme dark / light          to switch between dark and light theme.\n"
+             "    type   help <command>              for help with any <command>.\n"
+             "    type   :q / .q / q / x / exit      to exit.\n")
 
     def __init__(self):
         super().__init__()
