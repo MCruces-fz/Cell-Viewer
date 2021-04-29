@@ -42,6 +42,7 @@ class Prompt(Cmd):
              "    type   ? / help                    if you are new!\n"
              "    type   root                        to launch the GUI for ROOT  files.\n"
              "    type   ascii                       to launch the GUI for ASCII files.\n"
+             "    type   source                      to check source directories.\n"
              "    type   theme dark / light          to switch between dark and light theme.\n"
              "    type   help <command>              for help with any <command>.\n"
              "    type   :q / .q / q / x / exit      to exit.\n")
@@ -49,6 +50,7 @@ class Prompt(Cmd):
     def __init__(self):
         super().__init__()
         self.config = self.load_config()
+        self.setup()
 
     @staticmethod
     def do_exit(inp):
@@ -137,6 +139,42 @@ class Prompt(Cmd):
     def help_settings():
         print("Shows the current settings.")
 
+    @staticmethod
+    def do_source(inp):
+        from utils.dirs import ASCII_DATA_DIR, ROOT_DATA_DIR, TRUFA_LIB_DIR
+        print("Source Directories:")
+        print(f"ASCII_DATA_DIR: {ASCII_DATA_DIR}")
+        print(f"ROOT_DATA_DIR:  {ROOT_DATA_DIR}")
+        print(f"TRUFA_LIB_DIR:  {TRUFA_LIB_DIR}")
+        print()
+        print("Type 'source root / ascii' to check files inside.")
+        print()
+        print("(Edit utils/dirs.py to change them)")
+        print()
+
+        if inp == "root":
+            directory = ROOT_DATA_DIR
+        elif inp == "ascii":
+            directory = ASCII_DATA_DIR
+        elif inp in ["", " "]:
+            return 0
+        else:
+            print(f"There isn't any directory called {inp}")
+            return 0
+
+        print()
+        print(f"Files in {directory}:")
+        for file in sorted(os.listdir(directory)):
+            print(file)
+
+    @staticmethod
+    def help_source():
+        print("It shows source directories.")
+        print()
+        print("To check files in root / ascii directory, type:")
+        print("source root / ascii")
+        print()
+
     def save_config(self):
         with open("command/settings.json", "w+") as settings:
             json.dump(self.config, settings, indent=4)
@@ -154,3 +192,21 @@ class Prompt(Cmd):
             config = json.load(settings)
 
         return config
+
+    @staticmethod
+    def setup():
+        if not os.path.isfile("utils/dirs.py"):
+            directories = (
+                'ASCII_DATA_DIR = "/path/to/png/"'
+                'ROOT_DATA_DIR  = "/path/to/rootfiles/"'
+                'TRUFA_LIB_DIR  = "/path/to/libtunpacker.so"'
+            )
+            with open("utils/dirs.py", "w+") as dirs:
+                dirs.write(directories)
+
+            print("WARNING!!")
+            print("Go to utils/dirs.py and edit the variables as is")
+            print("documented in README.md")
+            print("https://github.com/MCruces-fz/Cell-Viewer/blob/master/README.md")
+            print("")
+
