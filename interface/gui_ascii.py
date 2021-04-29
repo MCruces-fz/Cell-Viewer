@@ -52,6 +52,9 @@ class CellsAppASCII(CellsApp):
         super().__init__(chef_object, window_title, theme)
 
     def update_datetime(self):
+        """
+        Method to update only date and time, specific for ASCII GUI.
+        """
         self.from_date = self.cal_from.get_date()
         self.to_date = self.cal_from.get_date()
 
@@ -67,7 +70,8 @@ class CellsAppASCII(CellsApp):
         :return: tk.Button object
         """
         button_obj = tk.Button(master=master,
-                               text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
+                               text=f"{self.inp_dt.plane_event[i, j]:.0f}",
+                               # text=f"{self.get_math_value(val=self.choice_math_val.get())[i, j]:.0f}",
                                height=2, width=4,
                                bg=bg_color, fg=fg_color,
                                command=lambda a=i, b=j: self.cell_button(a, b), bd=0)

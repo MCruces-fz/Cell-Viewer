@@ -25,7 +25,7 @@ License.
 from interface.parent_gui import CellsApp
 from kitchen.cook_root import CookDataROOT
 from kitchen.chef import Chef
-from figmap.cellmap import Cellmap
+# from figmap.cellmap import Cellmap
 from utils.tkinter_modules import tk
 from utils.const import NCOL, NROW
 
@@ -119,27 +119,18 @@ class CellsAppROOT(CellsApp):
         # SAVE BUTTON
         btn_save = tk.Button(
             master=self.window, text="SAVE",
-            command=self.save_state_png,
+            command=self.update_state_png,
             bg=self.bg_default, fg=self.fg_default,
             bd=0
         )
         btn_save.pack()
 
-    def save_state_png(self):
-
-        self.cellmap.update(
-            cooked=self.inp_dt,
-            hz=self.chk_hz.get()
-        )
-        self.cellmap.set_mapper(
-            set_max=self.chk_max.get(),
-            max_val=self.var_max_color.get(),
-            cmap_name=self.choice_cmap.get()
-        )
-
-        self.cellmap.save_file(ext="png")
-
     def show_mambos(self):
+        """
+        Show a summary of the motherboards with Tkinter buttons. Each button
+            has the mean of all values in one mambo. If you clic on some of
+            them, the total value and the mean will be printed in terminal.
+        """
 
         try:
             self.frm_mmbos.destroy()
@@ -272,6 +263,10 @@ class CellsAppROOT(CellsApp):
         )
 
     def refresh(self):
+        """
+        Action fot the OK button. It must refresh all cell buttons if necessary
+        """
+
         self.inp_dt.check_m1 = self.chk_m1.get()
         self.inp_dt.check_hz = self.chk_hz.get()
 

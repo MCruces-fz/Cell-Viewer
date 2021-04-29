@@ -165,15 +165,10 @@ class Cellmap:
         :param cmap_name: Name of the Color Map Gradient.
         """
         numpy_value = self.cooked.plane_event
-        try:
-            if set_max:
-                # TODO: Choose max_val
-                min_val = 0
-                max_val = float(max_val)
-            else:
-                min_val = np.min(numpy_value)
-                max_val = np.max(numpy_value)
-        except Exception:  # FIXME: Better exception, please!
+        if set_max:
+            min_val = 0
+            max_val = float(max_val)
+        else:
             min_val = np.min(numpy_value)
             max_val = np.max(numpy_value)
         norm = Normalize(vmin=min_val, vmax=max_val)

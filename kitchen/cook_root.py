@@ -53,8 +53,6 @@ class CookDataROOT(Chef):
         self._option_list_var: List[str] = ["RAW", "HIT", "SAETA"]
         self.current_var: str = self._option_list_var[0]
 
-        self.plane_event = None
-
         self.check_m1 = False
         self.check_hz = False
         self.last_check_m1 = False
@@ -217,6 +215,15 @@ class CookDataROOT(Chef):
 
     def update(self, from_date=None, to_date=None,
                plane_name: str = "T1", var_to_update: str = None):
+        """
+        Method to update all the self variables needed for the ROOT GUI.
+
+        :param from_date: Starting date in datetime format.
+        :param to_date: Ending date in datetime format.
+        :param plane_name: Name of the plane to get values.
+        :param var_to_update:
+        :return: Void function, It only updates self variables.
+        """
 
         # Update all data only if necessary
         if from_date != self.from_date or to_date != self.to_date or \

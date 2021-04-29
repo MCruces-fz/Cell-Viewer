@@ -43,6 +43,7 @@ class CookDataASCII(Chef):
         super().__init__(data_dir)
 
         self._option_list_var: List[str] = ["mean", "sigma", "kurtosis", "skewness"]
+        self.current_var = self._option_list_var[0]
 
         self.mean = None
         self.std = None
@@ -95,11 +96,34 @@ class CookDataASCII(Chef):
 
     def update(self, from_date=None, to_date=None,
                plane_name: str = "T1", var_to_update: str = None):
-        super().update(from_date, to_date, plane_name)
+        """
+        Method to update all the self variables needed for the ASCII GUI.
 
-        self.all_data = self.read_data()
+        :param from_date: Starting date in datetime format.
+        :param to_date: Ending date in datetime format.
+        :param plane_name: Name of the plane to get values.
+        :param var_to_update:
+        :return: Void function, It only updates self variables.
+        """
+        # super().update(from_date, to_date, plane_name)
 
-        self.mean = self.all_data.mean(axis=0)
-        self.std = self.all_data.std(axis=0)
-        self.kurtosis = kurtosis(self.all_data, axis=0)
-        self.skewness = skew(self.all_data, axis=0)
+        # Update all data only if necessary
+        if from_date != self.from_date or to_date != self.to_date or \
+                plane_name != self.plane_name or var_to_update != self.current_var:
+
+            self.from_date = from_date
+            self.to_date = to_date
+            self.plane_name = plane_name
+            self.current_var = var_to_update
+
+            self.all_data = self.read_data()
+
+            self.mean = self.all_data.mean(axis=0)
+            self.std = self.all_data.std(axis=0)
+            self.kurtosis = kurtosis(self.all_data, axis=0)
+            self.skewness = skew(self.all_data, axis=0)
+
+            self.plane_event = dict(zip(
+                self._option_list_var,
+                [self.mean, self.std, self.kurtosis, self.skewness]
+            ))[self.current_var]

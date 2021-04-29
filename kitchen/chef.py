@@ -46,6 +46,7 @@ class Chef:
         self.all_data = None
 
         self._option_list_var: List[str] = []
+        self.plane_event = None
 
     @property
     def option_list_var(self):
@@ -75,16 +76,18 @@ class Chef:
         :return: Void function, It only updates self variables.
         """
 
-        # Update all data only if necessary
-        if from_date != self.from_date or to_date != self.to_date or \
-                plane_name != self.plane_name:
+        raise Exception("Please, override this method.")
 
-            self.from_date = from_date
-            self.to_date = to_date
+        # # Update all data only if necessary
+        # if from_date != self.from_date or to_date != self.to_date or \
+        #         plane_name != self.plane_name:
 
-            self.plane_name = plane_name
+        #     self.from_date = from_date
+        #     self.to_date = to_date
 
-            # self.mean     =  MEAN
-            # self.std      =  STD
-            # self.kurtosis =  KURTOSIS
-            # self.skewness =  SKEWNESS
+        #     self.plane_name = plane_name
+
+        #     # self.mean     =  MEAN
+        #     # self.std      =  STD
+        #     # self.kurtosis =  KURTOSIS
+        #     # self.skewness =  SKEWNESS

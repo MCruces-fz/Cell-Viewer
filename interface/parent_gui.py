@@ -92,9 +92,8 @@ class CellsApp:
         self.choice_math_val = None
         self.choice_plane_var = None
         self.var_max_color = None
-        # self.chk_m1 = None
-        # self.chk_hz = None
         self.chk_max = None
+        self.chk_hz = None
 
         # L O G I C
         # Initiates first widget:
@@ -205,40 +204,39 @@ class CellsApp:
             var_to_update=self.choice_math_val.get()
         )
 
-        self.cellmap.update(
-            cooked=self.inp_dt,
-        )
-        self.cellmap.set_mapper(
-            set_max=self.chk_max.get(),
-            max_val=self.var_max_color.get(),
-            cmap_name=self.choice_cmap.get()
-        )
+        self.update_state_png(save=False)
 
         self.draw_cells()
         self.draw_colormap_bar(*self.cellmap.mapper.get_clim())  # min_val, max_val)
 
-    # def set_mapper(self):
-    #     """
-    #     Normalize item number values to colormap.
-    #     Create a matplotlib.cm.ScalarMappable called self.mapper.
+    def update_state_png(self, save: bool = True):
+        """
+        Update the Cellmap instance with the new chosen values.
 
-    #     (min, max) = self.mapper.get_clim()
-    #     color_map = self.mapper.get_cmap()
-    #     """
-    #     numpy_value = self.get_math_value(val=self.choice_math_val.get())
-    #     try:
-    #         if self.chk_max.get():
-    #             # TODO: Choose max_val
-    #             min_val = 0
-    #             max_val = float(self.var_max_color.get())
-    #         else:
-    #             min_val = np.min(numpy_value)
-    #             max_val = np.max(numpy_value)
-    #     except Exception:  # FIXME: Better exception, please!
-    #         min_val = np.min(numpy_value)
-    #         max_val = np.max(numpy_value)
-    #     norm = Normalize(vmin=min_val, vmax=max_val)
-    #     self.mapper = cm.ScalarMappable(norm=norm, cmap=self.choice_cmap.get())
+        :param save: True by default. If False, only update but not save.
+        """
+
+        try:
+            chk_max = self.chk_max.get()
+            chk_hz = self.chk_hz.get()
+            var_max_color = self.var_max_color.get()
+        except AttributeError:
+            chk_max = False
+            chk_hz = False
+            var_max_color = np.nan
+
+        self.cellmap.update(
+            cooked=self.inp_dt,
+            hz=chk_hz
+        )
+        self.cellmap.set_mapper(
+            set_max=chk_max,
+            max_val=var_max_color,
+            cmap_name=self.choice_cmap.get()
+        )
+
+        if save:
+            self.cellmap.save_file(ext="png")
 
     @staticmethod
     def grid_configure(frame: Union[tk.Frame, ttk.Frame], n_cols: int, n_rows: int,
@@ -327,30 +325,14 @@ class CellsApp:
                 )
                 frm_cell.grid(row=i, column=j, sticky="news")
 
-                numpy_value = self.get_math_value(val=self.choice_math_val.get())[i, j]
+                numpy_value = self.inp_dt.plane_event[i, j]
+                # numpy_value = self.get_math_value(val=self.choice_math_val.get())[i, j]
                 # bg_color, fg_color = self.set_button_colors(numpy_value)
                 bg_color, fg_color = self.cellmap.set_value_color(numpy_value)
                 btn_plot = self.grid_button(master=frm_cell,
                                             i=i, j=j,
                                             bg_color=bg_color, fg_color=fg_color)
                 btn_plot.pack(fill=tk.BOTH, expand=True)
-
-    # def set_button_colors(self, val: float):
-    #     """
-    #     This method is used for choose the color for each value in the cell buttons.
-    #     :param val: Value of each button.
-    #     :return: Colors for button background (bg_color) and button value (fg_color)
-    #     """
-    #     # Management of background color (button)
-    #     rgba_color = self.mapper.to_rgba(val)
-    #     rgb_color = rgba_color[:-1]
-    #     bg_color = to_hex(rgb_color)
-
-    #     # Management of foreground color (words)
-    #     inv_rgb_color = (1 - rgb_color[0], 1 - rgb_color[1], 1 - rgb_color[2])
-    #     fg_color = to_hex(inv_rgb_color)  # Foreground is inverted color of background
-
-    #     return bg_color, fg_color
 
     def grid_button(self, master, i, j, bg_color="#000000", fg_color="#ffffff") -> tk.Button:
         """
