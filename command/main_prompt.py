@@ -25,6 +25,7 @@ License.
 from cmd import Cmd
 import json
 import os
+import datetime
 
 
 class Prompt(Cmd):
@@ -173,6 +174,58 @@ class Prompt(Cmd):
         print()
         print("To check files in root / ascii directory, type:")
         print("source root / ascii")
+        print()
+
+    @staticmethod
+    def do_doy(inp):
+        try:
+            year, doy = inp.split("/")
+        except ValueError:
+            print("Input must be YY/DOY or YYYY/DOY")
+            return 0
+
+        if len(year) == 4:
+            year = int(year)
+        elif len(year) == 2:
+            year = int(f"20{year}")
+        else:
+            print("Year must be like '2021' or like '21'")
+            return 0
+        doy = int(doy)
+
+        output = datetime.date(year=year, month=1, day=1) + datetime.timedelta(days=doy - 1)
+        print("yyyy-mm-dd")
+        print(output)
+        print()
+
+    @staticmethod
+    def do_date(inp):
+        try:
+            year, month, day = inp.split("/")
+        except ValueError:
+            print("Input must be YY/MM/DD or YYYY/MM/DD")
+            return 0
+
+        if len(year) == 4:
+            year = int(year)
+        elif len(year) == 2:
+            year = int(f"20{year}")
+        else:
+            print("Year must be like '2021' or like '21'")
+            return 0
+        
+        month = int(month)
+        day = int(day)
+
+        try:
+            output = datetime.date(year=year, month=month, day=day).strftime("%Y-%j")
+        except Exception as e:
+            print(e.__doc__)
+            print(e)
+            return 0
+
+        print("yyyy-doy")
+        print(output)
         print()
 
     def save_config(self):
