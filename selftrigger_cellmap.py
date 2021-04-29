@@ -39,19 +39,21 @@ cellmap = Cellmap()
 # )
 file_path = join_path(
     "/home/mcruces/Documents/fptrucha_hits/test/",
-    "tr21117100312.hld.root.root"
+    "tr21119120000.hld.root.root"
 )
 
+# cooked.current_var = "SAETA"
 cooked.current_var = "RAW"
 cooked.check_m1 = False
 cooked.check_hz = False
 try:
     cooked.plane_name = FILE_PLANE[file_path.split("/")[-2]]
 except KeyError:
-    warnings.warn("Using plane T1 'cause we can't find TRB name in path.")
-    cooked.plane_name = "T1"
+    warnings.warn("Using plane T4 'cause we can't find TRB name in path.")
+    cooked.plane_name = "T4"
 
-cooked.get_raw_hits_array(file_path)
+cooked.get_rpc_saeta_array(file_path)
+# cooked.get_raw_hits_array(file_path)
 
 cellmap.update(cooked)
 cellmap.save_file(out_path=None, ext="png")
