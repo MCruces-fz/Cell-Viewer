@@ -41,9 +41,12 @@ class Prompt(Cmd):
              "              https://github.com/MCruces-fz/Cell-Viewer.git\n"
              "    \n\n"
              "    type   ? / help                    if you are new!\n"
+             "    type   help <command>              to get information about <command>.\n"
              "    type   root                        to launch the GUI for ROOT  files.\n"
              "    type   ascii                       to launch the GUI for ASCII files.\n"
              "    type   source                      to check source directories.\n"
+             "    type   doy YY/DOY                  to calculate date in format yyyy-mm-dd.\n"
+             "    type   date YY/MM/DD               to calculate date in format yyyy-doy.\n"
              "    type   theme dark / light          to switch between dark and light theme.\n"
              "    type   help <command>              for help with any <command>.\n"
              "    type   :q / .q / q / x / exit      to exit.\n")
@@ -198,6 +201,25 @@ class Prompt(Cmd):
         print(output)
         print()
 
+    def help_doy(self):
+        print("Command to calculate date in format yyyy-mm-dd from day of the year")
+        print("format: yy-doy or yyyy-doy")
+        print()
+        print("Usage:")
+        print(f"{self.prompt}doy YY/DOY")
+        print("or")
+        print(f"{self.prompt}doy YYYY/DOY")
+        print()
+        print("For instance:")
+        print(f"{self.prompt}doy 21/123")
+        print("yyyy-mm-dd")
+        print("2021-05-03")
+        print("or")
+        print(f"{self.prompt}doy 2021/321")
+        print("yyyy-mm-dd")
+        print("2021-11-17")
+        print()
+
     @staticmethod
     def do_date(inp):
         try:
@@ -226,6 +248,25 @@ class Prompt(Cmd):
 
         print("yyyy-doy")
         print(output)
+        print()
+
+    def help_date(self):
+        print("Command to calculate date in format yyyy-doy from date in ")
+        print("format: yy-mm-dd or yyyy-mm-dd")
+        print()
+        print("Usage:")
+        print(f"{self.prompt}date YY/MM/DD")
+        print("or")
+        print(f"{self.prompt}date YYYY/MM/DD")
+        print()
+        print("For instance:")
+        print(f"{self.prompt}date 21/05/03")
+        print("yyyy-doy")
+        print("2021-123")
+        print("or")
+        print(f"{self.prompt}date 2021/11/17")
+        print("yyyy-doy")
+        print("2021-321")
         print()
 
     def save_config(self):
