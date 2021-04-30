@@ -14,7 +14,8 @@ s*.vim
 command/settings.json
 
 store/*
-!store/screenshot.png
+!store/gui_screenshot.png
+!store/prompt_screenshot.png
 !store/saves/
 store/saves/*
 !store/saves/README.md

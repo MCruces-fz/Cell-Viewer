@@ -1,7 +1,9 @@
 # Cell Viewer
 Graphical User Interface to view stats about the TRASGO detectors easily.
 
-![Dark Theme](./store/screenshot.png) 
+Prompt                                   | GUI
+:---------------------------------------:|:-----------------------------------:
+![Prompt](./store/prompt_screenshot.png) | ![GUI](./store/gui_screenshot.png)
 
 ## How to use
 You can check ascii files (`tryydoyhhmmss.hld_cell_entries.dat`) with `ascii_cell_viewer.py` or root files (`tryydoyhhmmss.hld.root.root`). First are faster to read and you can check the mean of hits in runs (around 25 minutes each run), with standard deviation, skewness and kurtosis; instead, reading root files you can measure a more accurate rate (in Hz).
