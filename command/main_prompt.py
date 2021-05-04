@@ -44,22 +44,26 @@ class Prompt(Cmd):
              "    type   help <command>              to get information about <command>.\n"
              "    type   root                        to launch the GUI for ROOT  files.\n"
              "    type   ascii                       to launch the GUI for ASCII files.\n"
-             "    type   source                      to check source directories.\n"
+             "    type   source                      to check  or edit source directories.\n"
              "    type   doy YY/DOY                  to calculate date in format yyyy-mm-dd.\n"
              "    type   date YY/MM/DD               to calculate date in format yyyy-doy.\n"
              "    type   theme dark / light          to switch between dark and light theme.\n"
              "    type   help <command>              for help with any <command>.\n"
-             "    type   :q / .q / q / x / exit      to exit.\n")
+             "    type   :q / .q / q / x / exit      to exit and save settings.\n")
+
+    root_data_dir = None
+    ascii_data_dir = None
+    trufa_lib_dir = None
 
     def __init__(self):
         super().__init__()
-        self.config = self.load_config()
         self.setup()
+        self.config = self.load_config()
 
-    @staticmethod
-    def do_exit(inp):
+    def do_exit(self, inp):
         print(f"Bye!")
         print()
+        self.save_config()
         return True
 
     def default(self, inp):
@@ -67,6 +71,9 @@ class Prompt(Cmd):
             return self.do_exit(inp)
         else:
             print(f"Unknown syntax: {inp}")
+
+    def do_EOF(self, line):
+        return self.do_exit(line)
 
     @staticmethod
     def help_exit():
@@ -78,9 +85,8 @@ class Prompt(Cmd):
 
         from interface.gui_root import CellsAppROOT
         from kitchen.cook_root import CookDataROOT
-        from utils.dirs import ROOT_DATA_DIR
 
-        cook_data = CookDataROOT(data_dir=ROOT_DATA_DIR)
+        cook_data = CookDataROOT(data_dir=self.root_data_dir)
         # ary = cook_data.read_data()
         CellsAppROOT(chef_object=cook_data, theme=self.config["theme"])
 
@@ -100,9 +106,8 @@ class Prompt(Cmd):
 
         from interface.gui_ascii import CellsAppASCII
         from kitchen.cook_ascii import CookDataASCII
-        from utils.dirs import ASCII_DATA_DIR
 
-        cook_data = CookDataASCII(data_dir=ASCII_DATA_DIR)
+        cook_data = CookDataASCII(data_dir=self.ascii_data_dir)
         CellsAppASCII(chef_object=cook_data, theme=self.config["theme"])
 
         print("done")
@@ -138,45 +143,91 @@ class Prompt(Cmd):
         print(f"Current settings:  {inp}")
         print(json.dumps(self.config, indent=4))
         print()
+        print("Saved in command/settings.json")
+        print()
 
     @staticmethod
     def help_settings():
         print("Shows the current settings.")
 
-    @staticmethod
-    def do_source(inp):
-        from utils.dirs import ASCII_DATA_DIR, ROOT_DATA_DIR, TRUFA_LIB_DIR
-        print("Source Directories:")
-        print(f"ASCII_DATA_DIR: {ASCII_DATA_DIR}")
-        print(f"ROOT_DATA_DIR:  {ROOT_DATA_DIR}")
-        print(f"TRUFA_LIB_DIR:  {TRUFA_LIB_DIR}")
-        print()
-        print("Type 'source root / ascii' to check files inside.")
-        print()
-        print("(Edit utils/dirs.py to change them)")
-        print()
+    def do_source(self, inp):
+        args = inp.split(" ")
 
-        if inp == "root":
-            directory = ROOT_DATA_DIR
-        elif inp == "ascii":
-            directory = ASCII_DATA_DIR
-        elif inp in ["", " "]:
-            return 0
+        def show(cls):
+            print("Source Directories:")
+            print(f"ROOT data:  {cls.root_data_dir}")
+            print(f"ASCII data: {cls.ascii_data_dir}")
+            print(f"TRUFA library:  {cls.trufa_lib_dir}")
+            print()
+
+        if args[0] in ["show"]:
+            show(self)
+            if len(args) == 2:
+                if args[1] == "root":
+                    directory = self.root_data_dir
+                elif args[1] == "ascii":
+                    directory = self.ascii_data_dir
+                elif args[1] in ["", " "]:
+                    print("   -   ")
+                    return 0
+                else:
+                    print(f"There isn't any directory called {inp}")
+                    return 0
+
+                print(f"Files in {directory}:")
+                for file in sorted(os.listdir(directory)):
+                    print(file)
+                print()
+        elif args[0] == "edit":
+            if len(args) != 3:
+                print("Usage:")
+                print("    source edit <dir> <slot-name>")
+                print("Example:")
+                print("    source edit root main")
+                return 0
+
+            print("Type or paste directory:")
+            inp_dir = input()
+            if not os.path.isdir(inp_dir):
+                print(f"Directory doesn't exist: {inp_dir}")
+            else:
+                self.config["dirs"][args[1]][args[2]] = inp_dir
+
+            self.save_config()
+        elif args[0] == "set":
+            if len(args) != 3:
+                print("Usage:")
+                print("    source set <dir> <slot-name>")
+                print("Example:")
+                print("    source set root main")
+                return 0
+
+            if args[1] == "root":
+                self.root_data_dir = self.config["dirs"][args[1]][args[2]]
+            elif args[1] == "ascii":
+                self.ascii_data_dir = self.config["dirs"][args[1]][args[2]]
+            else:
+                return 0
+
+            self.save_config()
         else:
-            print(f"There isn't any directory called {inp}")
+            show(self)
+            print("Type 'help source' to see all features.")
+            print()
             return 0
-
-        print()
-        print(f"Files in {directory}:")
-        for file in sorted(os.listdir(directory)):
-            print(file)
 
     @staticmethod
     def help_source():
-        print("It shows source directories.")
+        print("Usage:")
+        print("    source                             basic view")
+        print("    source show                        to show source directories")
+        print("    source show <dir>                  to check files in root / ascii directories")
+        print("    source edit <dir> <slot-name>      to add / edit another directory")
+        print("    source set <dir> <slot-name>       to set as default an existent directory")
         print()
-        print("To check files in root / ascii directory, type:")
-        print("source root / ascii")
+        print("with <dir> in (ascii, root)")
+        print("with <slot-name> any string")
+        print("    to check all <slot-name>s, type settings.")
         print()
 
     @staticmethod
@@ -235,7 +286,7 @@ class Prompt(Cmd):
         else:
             print("Year must be like '2021' or like '21'")
             return 0
-        
+
         month = int(month)
         day = int(day)
 
@@ -273,17 +324,50 @@ class Prompt(Cmd):
         with open("command/settings.json", "w+") as settings:
             json.dump(self.config, settings, indent=4)
 
-    @staticmethod
-    def load_config():
+    def load_config(self):
         if not os.path.isfile("command/settings.json"):
+            try:
+                from utils.dirs import ROOT_DATA_DIR, ASCII_DATA_DIR, TRUFA_LIB_DIR
+                main_root_dir = ROOT_DATA_DIR
+                main_ascii_dir = ASCII_DATA_DIR
+                trufa_lib_dir = TRUFA_LIB_DIR
+            except Exception as e:
+                print(e)
+                print(e.__doc__)
+                e_name = e.__class__.__name__
+                if e_name == "ModuleNotFoundError":
+                    print("You need to edit main directories manually "
+                          "in command/settings.json")
+                elif e_name == "ImportError":
+                    print("You need to edit main directories manually "
+                          "in command/settings.json")
+                else:
+                    print("Bad option")
+                main_root_dir = "/path/to/rootfiles/"
+                main_ascii_dir = "/path/to/png/"
+                trufa_lib_dir = "/path/to/trufa_dir/"
+
             configuration = {
-                "theme": "dark"
+                "theme": "dark",
+                "dirs": {
+                    "root": {
+                        "main": main_root_dir
+                    },
+                    "ascii": {
+                        "main": main_ascii_dir
+                    },
+                    "trufa": trufa_lib_dir
+                }
             }
             with open("command/settings.json", "w+") as settings:
-                json.dump(configuration, settings)
+                json.dump(configuration, settings, indent=4)
 
         with open("command/settings.json", "r+") as settings:
             config = json.load(settings)
+
+        self.root_data_dir = config["dirs"]["root"]["main"]
+        self.ascii_data_dir = config["dirs"]["ascii"]["main"]
+        self.trufa_lib_dir = config["dirs"]["trufa"]
 
         return config
 
@@ -303,4 +387,3 @@ class Prompt(Cmd):
             print("documented in README.md")
             print("https://github.com/MCruces-fz/Cell-Viewer/blob/master/README.md")
             print("")
-
