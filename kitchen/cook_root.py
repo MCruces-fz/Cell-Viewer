@@ -81,7 +81,7 @@ class CookDataROOT(Chef):
         self.plane_event = np.zeros((NROW, NCOL), dtype=np.uint32)
         self.used_filenames = []
 
-        for filename in sorted(os.listdir(ROOT_DATA_DIR)):
+        for filename in sorted(os.listdir(self.main_data_dir)):
             if not filename.startswith(('tr', 'st')) or not filename.endswith('.root'): continue
             tstamp_file = int(filename[2:2 + len(file_from)])
             if tstamp_from <= tstamp_file <= tstamp_to:
