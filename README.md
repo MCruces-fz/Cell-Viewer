@@ -15,7 +15,7 @@ First you need to create the file `utils/dirs.py` and add as UPPERCASE constants
 
 ASCII_DATA_DIR = "/path/to/png/"
 ROOT_DATA_DIR  = "/path/to/rootfiles/"
-TRUFA_LIB_DIR  = "/path/to/libtunpacker.so"
+TRUFA_LIB_DIR  = "/path/to/TRUFA/"
 ```
 where `ASCII_DATA_DIR` is the path to the directory where you have stored a copy from files in
 ```bash
@@ -27,7 +27,7 @@ tryydoyhhmmss.hld.root.root
 # or
 styydoyhhmmss.hld.root.root
 ```
-and `TRUFA_LIB_DIR` is the path to the "TRUFA" compiled library.
+and `TRUFA_LIB_DIR` is the path to the directory usually called "TRUFA", where is the compiled library `libtunpacker.so`
 
 ### Install dependencies
 You need to work with:
