@@ -203,23 +203,9 @@ class Prompt(Cmd):
                 return 0
 
             if args[1] == "root":
-                if args[2] not in self.config["dirs"]["root"].keys():
-                    print(f"There isn't '{args[2]}' option in root sources.")
-                    print("You can choose:")
-                    for key in self.config["dirs"]["root"]:
-                        print(f"  - {key}: {self.config['dirs']['root'][key]}")
-                    return 0
-                self.config["dirs"]["root"]["main"] = self.config["dirs"]["root"][args[2]]
-                self.root_data_dir = self.config["dirs"]["root"]["main"]
+                self.root_data_dir = self.set_source("root", args[2])
             elif args[1] == "ascii":
-                if args[2] not in self.config["dirs"]["ascii"].keys():
-                    print(f"There isn't '{args[2]}' option in ascii sources.")
-                    print("You can choose:")
-                    for key in self.config["dirs"]["ascii"]:
-                        print(f"  - {key}: {self.config['dirs']['ascii'][key]}")
-                    return 0
-                self.config["dirs"]["ascii"]["main"] = self.config["dirs"]["ascii"][args[2]]
-                self.ascii_data_dir = self.config["dirs"][args[1]][args[2]]
+                self.ascii_data_dir = self.set_source("ascii", args[2])
             else:
                 print(f"Bad option: '{args[1]}'. It must be 'ascii' or 'root'")
                 return 0
@@ -230,6 +216,16 @@ class Prompt(Cmd):
             print("Type 'help source' to see all features.")
             print()
             return 0
+
+    def set_source(self, dir_name: str, slot_name: str):
+        if slot_name not in self.config["dirs"][dir_name].keys():
+            print(f"There isn't slot '{slot_name}' in {dir_name} sources.")
+            print("You can choose:")
+            for slot in self.config["dirs"][dir_name]:
+                print(f"  - {slot}: {self.config['dirs'][dir_name][slot]}")
+        else:
+            self.config["dirs"][dir_name]["main"] = self.config["dirs"][dir_name][slot_name]
+        return self.config["dirs"][dir_name]["main"]
 
     @staticmethod
     def help_source():
