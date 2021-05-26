@@ -68,25 +68,29 @@ of view, when you view TRAGALDABAS from the southwest (entering the door).
 Here are the cell layouts in both cases:
 
 #### Motherboards on App:
-The Motherboard layout shown in this GUI, is the specular image of the real layout. See **Real layout**
+The Motherboard layout shown in this GUI is the most natural way to understand it according to the coordinates.
 ```
-:-----:-----:
-: MB3 : MB2 :
-:-----:-----:
-: MB4 : MB1 :
-:-----:-----:
+Y
+  ^ :-----:-----:
+  | : MB4 : MB1 :
+  | :-----:-----:
+  | : MB3 : MB2 :
+  | :-----:-----:
+  +-------------->
+                  X
 ```
 
 #### Real layout:
 The LabCAF is represented below with *ASCII Art*:
 ```
-                        FAN  _ W
-       :-----:-----:   ///   | I
-       : MB2 : MB3 :         | N
-       :-----:-----:         | D
-       : MB1 : MB4 :         | O
-       :-----:-----:         | W
-                             - S
+              X          
+               <-----+    FAN  _ W
+       :-----:-----: |   ///   | I
+       : MB2 : MB3 : |         | N
+       :-----:-----: v         | D
+       : MB1 : MB4 :   Y       | O
+       :-----:-----:           | W
+                               - S
                                        N   compass
          L a b C A F                    \
                                     W ---\--- E
