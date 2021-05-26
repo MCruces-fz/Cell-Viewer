@@ -199,14 +199,29 @@ class Prompt(Cmd):
                 print("Usage:")
                 print("    source set <dir> <slot-name>")
                 print("Example:")
-                print("    source set root main")
+                print("    source set root data")
                 return 0
 
             if args[1] == "root":
-                self.root_data_dir = self.config["dirs"][args[1]][args[2]]
+                if args[2] not in self.config["dirs"]["root"].keys():
+                    print(f"There isn't '{args[2]}' option in root sources.")
+                    print("You can choose:")
+                    for key in self.config["dirs"]["root"]:
+                        print(f"  - {key}: {self.config['dirs']['root'][key]}")
+                    return 0
+                self.config["dirs"]["root"]["main"] = self.config["dirs"]["root"][args[2]]
+                self.root_data_dir = self.config["dirs"]["root"]["main"]
             elif args[1] == "ascii":
+                if args[2] not in self.config["dirs"]["ascii"].keys():
+                    print(f"There isn't '{args[2]}' option in ascii sources.")
+                    print("You can choose:")
+                    for key in self.config["dirs"]["ascii"]:
+                        print(f"  - {key}: {self.config['dirs']['ascii'][key]}")
+                    return 0
+                self.config["dirs"]["ascii"]["main"] = self.config["dirs"]["ascii"][args[2]]
                 self.ascii_data_dir = self.config["dirs"][args[1]][args[2]]
             else:
+                print(f"Bad option: '{args[1]}'. It must be 'ascii' or 'root'")
                 return 0
 
             self.save_config()
@@ -377,7 +392,7 @@ class Prompt(Cmd):
             directories = (
                 'ASCII_DATA_DIR = "/path/to/png/"'
                 'ROOT_DATA_DIR  = "/path/to/rootfiles/"'
-                'TRUFA_LIB_DIR  = "/path/to/libtunpacker.so"'
+                'TRUFA_LIB_DIR  = "/path/to/TRUFA/"'
             )
             with open("utils/dirs.py", "w+") as dirs:
                 dirs.write(directories)
