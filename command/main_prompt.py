@@ -77,7 +77,7 @@ class Prompt(Cmd):
 
     @staticmethod
     def help_exit():
-        print("Write 'exit' to close this.")
+        print("    Write 'exit' to close this.")
         print()
 
     def do_root(self, inp):
@@ -95,10 +95,10 @@ class Prompt(Cmd):
 
     @staticmethod
     def help_root():
-        print("This command launches the Graphical User Interface for checking")
-        print("the state of the Tragaldabas detector.")
-        print("For more information, check the README:")
-        print("https://github.com/MCruces-fz/Cell-Viewer/blob/master/README.md")
+        print("    This command launches the Graphical User Interface for checking")
+        print("    the state of the Tragaldabas detector.")
+        print("    For more information, check the README:")
+        print("    https://github.com/MCruces-fz/Cell-Viewer/blob/master/README.md")
         print()
 
     def do_ascii(self, inp):
@@ -115,10 +115,10 @@ class Prompt(Cmd):
 
     @staticmethod
     def help_ascii():
-        print("This command launches the Graphical User Interface for checking")
-        print("the state of the Tragaldabas detector.")
-        print("For more information, check the README:")
-        print("https://github.com/MCruces-fz/Cell-Viewer/blob/master/README.md")
+        print("    This command launches the Graphical User Interface for checking")
+        print("    the state of the Tragaldabas detector.")
+        print("    For more information, check the README:")
+        print("    https://github.com/MCruces-fz/Cell-Viewer/blob/master/README.md")
         print()
 
     def do_theme(self, theme):
@@ -132,11 +132,11 @@ class Prompt(Cmd):
             print()
 
     def help_theme(self):
-        print(f"Current theme: {self.config['theme']}")
+        print(f"    Current theme: {self.config['theme']}")
         print()
-        print("Usage:")
-        print("theme dark: Use dark theme")
-        print("theme light: Use light theme")
+        print("    Usage:")
+        print("    theme dark: Use dark theme")
+        print("    theme light: Use light theme")
         print()
 
     def do_settings(self, inp):
@@ -148,29 +148,29 @@ class Prompt(Cmd):
 
     @staticmethod
     def help_settings():
-        print("Shows the current settings.")
+        print("    Shows the current settings.")
+        print()
 
     def do_source(self, inp):
         args = inp.split(" ")
 
-        def show(cls):
-            print("Source Directories:")
-            print(f"ROOT data:  {cls.root_data_dir}")
-            print(f"ASCII data: {cls.ascii_data_dir}")
-            print(f"TRUFA library:  {cls.trufa_lib_dir}")
-            print()
-
         if args[0] in ["show"]:
-            show(self)
-            if len(args) == 2:
+            if len(args) == 1:
+                self.show_source_dirs()
+            elif len(args) == 2:
                 if args[1] == "root":
                     directory = self.root_data_dir
                 elif args[1] == "ascii":
                     directory = self.ascii_data_dir
+                elif args[1] == "all":
+                    self.show_source_dirs(show_all=True)
+                    return 0
                 elif args[1] in ["", " "]:
+                    self.show_source_dirs()
                     print("   -   ")
                     return 0
                 else:
+                    self.show_source_dirs()
                     print(f"There isn't any directory called {inp}")
                     return 0
 
@@ -212,33 +212,52 @@ class Prompt(Cmd):
 
             self.save_config()
         else:
-            show(self)
+            self.show_source_dirs()
             print("Type 'help source' to see all features.")
             print()
             return 0
+
+    def show_all_slots(self, dir_name):
+        for slot in self.config["dirs"][dir_name]:
+            if slot == "main": continue
+            print(f"  - {slot}: {self.config['dirs'][dir_name][slot]}")
+
+    def show_source_dirs(self, show_all: bool = False):
+        print("Source Directories:")
+        print(f"ROOT data:  {self.root_data_dir}")
+        if show_all:
+            self.show_all_slots("root")
+        print(f"ASCII data: {self.ascii_data_dir}")
+        if show_all:
+            self.show_all_slots("ascii")
+        print(f"TRUFA library:  {self.trufa_lib_dir}")
+        print()
 
     def set_source(self, dir_name: str, slot_name: str):
         if slot_name not in self.config["dirs"][dir_name].keys():
             print(f"There isn't slot '{slot_name}' in {dir_name} sources.")
             print("You can choose:")
-            for slot in self.config["dirs"][dir_name]:
-                print(f"  - {slot}: {self.config['dirs'][dir_name][slot]}")
+            self.show_all_slots(dir_name)
+            print("If you want another path, type:")
+            print(f"    source edit {dir_name} <slot-name>")
         else:
             self.config["dirs"][dir_name]["main"] = self.config["dirs"][dir_name][slot_name]
         return self.config["dirs"][dir_name]["main"]
 
     @staticmethod
     def help_source():
-        print("Usage:")
-        print("    source                             basic view")
-        print("    source show                        to show source directories")
-        print("    source show <dir>                  to check files in root / ascii directories")
-        print("    source edit <dir> <slot-name>      to add / edit another directory")
-        print("    source set <dir> <slot-name>       to set as default an existent directory")
+        print("    Usage:")
+        print("        source                             basic view")
+        print("        source show                        to show source directories")
+        print("        source show  all                   to show all directories (you can choose any listed")
+        print("                                               directory with 'source set <dir> <slot-name>').")
+        print("        source show <dir>                  to check files in root / ascii directories")
+        print("        source edit <dir> <slot-name>      to add / edit another directory")
+        print("        source set <dir> <slot-name>       to set as default an existent directory")
         print()
-        print("with <dir> in (ascii, root)")
-        print("with <slot-name> any string")
-        print("    to check all <slot-name>s, type settings.")
+        print("    with <dir> = 'ascii', 'root'")
+        print("    with <slot-name> = 'any_string' (without spaces)")
+        print("        to check all <slot-name>s available, type: 'source show all'.")
         print()
 
     @staticmethod
@@ -264,22 +283,22 @@ class Prompt(Cmd):
         print()
 
     def help_doy(self):
-        print("Command to calculate date in format yyyy-mm-dd from day of the year")
-        print("format: yy-doy or yyyy-doy")
+        print("    Command to calculate date in format yyyy-mm-dd from day of the year")
+        print("    format: yy-doy or yyyy-doy")
         print()
-        print("Usage:")
-        print(f"{self.prompt}doy YY/DOY")
-        print("or")
-        print(f"{self.prompt}doy YYYY/DOY")
+        print("    Usage:")
+        print(f"    {self.prompt}doy YY/DOY")
+        print("    or")
+        print(f"    {self.prompt}doy YYYY/DOY")
         print()
-        print("For instance:")
-        print(f"{self.prompt}doy 21/123")
-        print("yyyy-mm-dd")
-        print("2021-05-03")
-        print("or")
-        print(f"{self.prompt}doy 2021/321")
-        print("yyyy-mm-dd")
-        print("2021-11-17")
+        print("    For instance:")
+        print(f"    {self.prompt}doy 21/123")
+        print("    yyyy-mm-dd")
+        print("    2021-05-03")
+        print("    or")
+        print(f"    {self.prompt}doy 2021/321")
+        print("    yyyy-mm-dd")
+        print("    2021-11-17")
         print()
 
     @staticmethod
@@ -313,22 +332,22 @@ class Prompt(Cmd):
         print()
 
     def help_date(self):
-        print("Command to calculate date in format yyyy-doy from date in ")
-        print("format: yy-mm-dd or yyyy-mm-dd")
+        print("    Command to calculate date in format yyyy-doy from date in ")
+        print("    format: yy-mm-dd or yyyy-mm-dd")
         print()
-        print("Usage:")
-        print(f"{self.prompt}date YY/MM/DD")
-        print("or")
-        print(f"{self.prompt}date YYYY/MM/DD")
+        print("    Usage:")
+        print(f"    {self.prompt}date YY/MM/DD")
+        print("    or")
+        print(f"    {self.prompt}date YYYY/MM/DD")
         print()
-        print("For instance:")
-        print(f"{self.prompt}date 21/05/03")
-        print("yyyy-doy")
-        print("2021-123")
-        print("or")
-        print(f"{self.prompt}date 2021/11/17")
-        print("yyyy-doy")
-        print("2021-321")
+        print("    For instance:")
+        print(f"    {self.prompt}date 21/05/03")
+        print("    yyyy-doy")
+        print("    2021-123")
+        print("    or")
+        print(f"    {self.prompt}date 2021/11/17")
+        print("    yyyy-doy")
+        print("    2021-321")
         print()
 
     def save_config(self):
