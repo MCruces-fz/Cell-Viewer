@@ -6,7 +6,7 @@ Prompt                                   | GUI
 ![Prompt](./store/prompt_screenshot.png) | ![GUI](./store/gui_screenshot.png)
 
 ## How to use
-You can check ascii files (`tryydoyhhmmss.hld_cell_entries.dat`) with `ascii_cell_viewer.py` or root files (`tryydoyhhmmss.hld.root.root`). First are faster to read and you can check the mean of hits in runs (around 25 minutes each run), with standard deviation, skewness and kurtosis; instead, reading root files you can measure a more accurate rate (in Hz).
+You can check ascii files (`tryydoyhhmmss.hld_cell_entries.dat`) with `ascii` command or root files (`tryydoyhhmmss.hld.root.root`) with `root` command inside prompt. First are faster to read and you can check the mean of hits in runs (around 25 minutes each run), with *standard deviation*, *skewness* and *kurtosis*; instead, reading root files you can measure a more accurate rate (in Hz) and check much more data.
 
 ### Set working directories
 First you need to create the file `utils/dirs.py` and add as UPPERCASE constants the following strings:
