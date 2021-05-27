@@ -1,5 +1,5 @@
 # Cell Viewer
-Graphical User Interface to view stats about the TRASGO detectors easily.
+Graphical User Interface to view stats about the TRASGO detectors easily (currently optimized for TRAGALDABAS only).
 
 Prompt                                   | GUI
 :---------------------------------------:|:-----------------------------------:
